@@ -1,11 +1,15 @@
+// --- src/components/PlantPage.jsx ---
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PRODUCTS, ACCESSORIES } from './data.js'; // Importamos PRODUCTS
+// CORREGIDO: Importar PRODUCTS y ACCESSORIES
+import { PRODUCTS, ACCESSORIES } from './data.js'; 
 import CommentsFull from './ComentsFull.jsx';
 
 export default function PlantPage(){
   const { id } = useParams();
   const nav = useNavigate();
+  // CORREGIDO: Buscar la planta en PRODUCTS
   const plant = PRODUCTS.find(p => p.id === id) || PRODUCTS[0];
   
   // Estado para simular la compra
@@ -15,7 +19,6 @@ export default function PlantPage(){
   // Función de Simulación de Compra para la planta principal
   const handleBuyPlant = () => {
     setPlantInCart(true);
-    // Simulación: se podría añadir al carrito global aquí
     alert(`🎉 ¡${plant.name} añadido al carrito por $${plant.price.toFixed(2)}!`);
   };
 

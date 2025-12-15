@@ -1,3 +1,5 @@
+// --- src/components/Card.jsx ---
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -6,7 +8,7 @@ export default function Card({ plant }){
   const nav = useNavigate();
   const [liked, setLiked] = useState(false);
   
-  // Marketing Indicator Styling
+  // Estilos de Marketing
   const petFriendlyClass = plant.petFriendly 
     ? "bg-emerald-600 text-white" 
     : "bg-red-600 text-white";
@@ -14,7 +16,7 @@ export default function Card({ plant }){
   return (
     <motion.article whileHover={{ scale:1.02 }} className="bg-white rounded-xl overflow-hidden shadow-lg border border-green-100">
       <div className="relative h-44 cursor-pointer" onClick={() => nav(`/plant/${plant.id}`)}>
-        {/* Imagen Única */}
+        {/* Imagen Única de la planta */}
         <img src={plant.image} alt={plant.name} className="w-full h-full object-cover transition duration-300 hover:opacity-90" />
         
         {/* Botón de Favoritos */}
@@ -27,7 +29,7 @@ export default function Card({ plant }){
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
             <h3 className="font-bold text-xl text-green-800">{plant.name}</h3>
-            {/* Etiqueta de Marketing Clave */}
+            {/* Precio */}
             <span className="text-lg font-extrabold text-green-700">${plant.price.toFixed(2)}</span>
         </div>
         
@@ -36,7 +38,7 @@ export default function Card({ plant }){
         </p>
         <div className="mt-3 flex justify-between items-center text-xs">
           
-          {/* Indicador de Venta/Marketing */}
+          {/* Indicador de Marketing */}
           <span className={`px-2 py-1 rounded-full text-white font-semibold ${petFriendlyClass}`}>
             {plant.petFriendly ? '🐶 Pet-Friendly' : '⚠️ No Pets'}
           </span>

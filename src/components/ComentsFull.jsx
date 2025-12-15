@@ -1,3 +1,5 @@
+// --- src/components/CommentsFull.jsx ---
+
 import React, { useState } from 'react';
 
 export default function CommentsFull({ plantId }) {
