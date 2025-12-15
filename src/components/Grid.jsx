@@ -1,7 +1,7 @@
 // --- src/components/Grid.jsx ---
 
 import React, { useState } from 'react';
-import { PRODUCTS } from './data.js'; // CORREGIDO: Usar PRODUCTS
+import { PRODUCTS } from '../components/data.js';
 import Card from './Card.jsx';
 
 export default function Grid(){

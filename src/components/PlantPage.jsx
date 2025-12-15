@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 // CORREGIDO: Importar PRODUCTS y ACCESSORIES
-import { PRODUCTS, ACCESSORIES } from './data.js'; 
+import { PRODUCTS, ACCESSORIES } from '../components/data.js'; 
 import CommentsFull from './ComentsFull.jsx';
 
 export default function PlantPage(){
