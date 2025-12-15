@@ -1,7 +1,7 @@
 // src/components/Profile.jsx
 
-import React, { useEffect, useState, useRef, useCallback } from "react";
-// Solo importamos auth y db, ya que Storage está deshabilitado
+import React, { useEffect, useState, useRef } from "react";
+// Solo importamos auth y db
 import { auth, db } from "../firebase.js"; 
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -17,7 +17,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-// Importaciones Individuales de Iconos (soluciona el error de Vite/SyntaxError)
+// Importaciones Individuales de Iconos (Corregido para evitar el error de caché/SyntaxError de Vite)
 import { FiUploadCloud } from "react-icons/fi";
 import { FiTrash2 } from "react-icons/fi";
 import { FiSave } from "react-icons/fi";
@@ -25,7 +25,7 @@ import { FiEdit3 } from "react-icons/fi";
 import { FiLock } from "react-icons/fi";
 import { FiUnlock } from "react-icons/fi";
 import { FiInstagram } from "react-icons/fi";
-import { FiWhatsapp } from "react-icons/fi";
+import { FiWhatsapp } from "react-icons/fi"; // <-- Este es el que fallaba, ahora importado correctamente
 import { FiRefreshCw } from "react-icons/fi"; 
 
 // --- URLs de Marcador de Posición ---
@@ -46,19 +46,16 @@ const initialProfileState = {
 
 export default function Profile() {
   const nav = useNavigate();
-  // Inicializamos user con el usuario actual o null
   const [user, setUser] = useState(auth.currentUser);
   const [loading, setLoading] = useState(true);
   
   const [profileData, setProfileData] = useState(initialProfileState);
   const [originalProfileData, setOriginalProfileData] = useState(initialProfileState);
   
-  // Estados de carga de archivos (Deshabilitados para no usar Storage)
   const [isUploadingAvatar] = useState(false);
   const [isUploadingCover] = useState(false);
-  const [isUploadingGallery] = useState(false);
+  const [isUploadingGallery, setIsUploadingGallery] = useState(false);
   
-  // gallery & stats
   const [gallery, setGallery] = useState([]);
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
@@ -76,7 +73,6 @@ export default function Profile() {
   useEffect(() => {
     const unsubAuth = auth.onAuthStateChanged((u) => {
       setUser(u);
-      // Solo establecemos loading a false si ya tenemos el estado de auth
       setLoading(false); 
       if (!u) {
         nav("/auth");
@@ -87,7 +83,6 @@ export default function Profile() {
 
   // 2. Carga Inicial del Perfil desde Firestore
   useEffect(() => {
-    // Si el usuario no existe o loading sigue siendo true, salimos
     if (!user || loading) return; 
     
     const refDoc = doc(db, "profiles", user.uid);
@@ -113,15 +108,13 @@ export default function Profile() {
         setProfileData(loadedData);
         setOriginalProfileData(loadedData);
       } else {
-        // Si no existe el documento, inicializamos con datos base
         setProfileData(baseData);
         setOriginalProfileData(baseData);
-        // Opcional: Podrías crear el documento base aquí si quieres forzar su existencia.
       }
     });
 
     return () => unsubProfile();
-  }, [user, loading]); // Depende de user y loading
+  }, [user, loading]); 
 
   // 3. Carga de Galería y Contadores
   useEffect(() => {
@@ -140,7 +133,6 @@ export default function Profile() {
   
   // --- FUNCIÓNES DE ARCHIVOS SIMULADAS (NO USAN FIREBASE STORAGE) ---
   
-  // Simulación: Alerta y actualiza a una URL temporal (opcional)
   async function handleAvatarChange(file) {
     alert("¡AVISO! La subida de archivos está desactivada (Firebase Storage no está activo).");
     const tempUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop"; 
@@ -153,9 +145,7 @@ export default function Profile() {
     await setDoc(doc(db, "profiles", user.uid), { coverURL: tempUrl }, { merge: true });
   }
 
-  // Añade un item de Galería usando una URL fija y lo guarda en Firestore
   async function handleGalleryUpload() {
-    // Usamos esta función directamente en el botón, sin esperar un archivo
     setIsUploadingGallery(true);
     try {
       await addDoc(collection(db, "profiles", user.uid, "gallery"), {
@@ -168,12 +158,10 @@ export default function Profile() {
       console.error(e);
       alert(`Error al añadir elemento: ${e.message}`);
     } finally {
-      // Aunque no hay subida real, simulamos la finalización
       setIsUploadingGallery(false); 
     }
   }
 
-  // Solo borra el documento de Firestore
   async function removeGalleryItem(item) {
     if (!window.confirm("¿Estás seguro de que quieres eliminar esta imagen?")) return;
     try {
@@ -185,8 +173,6 @@ export default function Profile() {
     }
   }
 
-
-  // Guardar datos del perfil
   async function saveProfile() {
     if (!hasChanges) {
         alert("No hay cambios que guardar.");
@@ -236,10 +222,8 @@ export default function Profile() {
 
   // --- Renderizado Condicional ---
 
-  // 1. Mostrar Cargando
   if (loading) return <div className="p-6 text-center text-xl min-h-screen flex items-center justify-center bg-gray-50">Cargando perfil...</div>;
   
-  // 2. Si no hay usuario (debería redirigir, pero es una protección)
   if (!user) return null; 
 
   // --- Clases de Tema ---
@@ -260,7 +244,6 @@ export default function Profile() {
             className="h-56 bg-cover bg-center rounded-b-2xl shadow-md" />
           <label className={`absolute right-6 top-4 ${cardClass.split(' ')[0]} ${cardClass.split(' ')[2]} text-sm px-3 py-1 rounded-full cursor-pointer flex items-center gap-2 hover:bg-opacity-90 transition`}>
             <span className="text-red-500">❌ Desactivado</span>
-            {/* El input se mantiene solo para simular, pero está deshabilitado */}
             <input ref={coverInputRef} type="file" className="hidden" 
                    accept="image/*"
                    disabled={true} 
@@ -281,7 +264,6 @@ export default function Profile() {
                 />
                 <label className={`absolute right-0 bottom-0 ${primaryButtonClass} text-white text-xs px-2 py-1 rounded-full cursor-pointer flex items-center gap-1`}>
                   <span className="text-red-500">❌</span>
-                  {/* El input se mantiene solo para simular, pero está deshabilitado */}
                   <input ref={fileInputRef} type="file" className="hidden" 
                          accept="image/*"
                          disabled={true} 
@@ -414,7 +396,6 @@ export default function Profile() {
                               initial={{ scale: 0.9, opacity: 0 }} 
                               animate={{ scale: 1, opacity: 1 }} 
                               transition={{ duration: 0.3 }}>
-                    {/* Usamos item.url que viene de Firestore (URL Fija) */}
                     <img src={item.url} alt="Galería" className="w-full h-40 object-cover transition duration-300 group-hover:scale-105" />
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
                       <button onClick={() => removeGalleryItem(item)} 
@@ -431,7 +412,6 @@ export default function Profile() {
           {/* ACTIVIDAD & LOGROS (manteniendo estructura) */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
             
-            {/* Actividad */}
             <div className={`${cardClass} p-4`}>
               <h4 className="font-bold text-lg mb-3">Actividad reciente</h4>
               <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2">
@@ -441,7 +421,6 @@ export default function Profile() {
               </ul>
             </div>
 
-            {/* Logros */}
             <div className={`${cardClass} p-4`}>
               <h4 className="font-bold text-lg mb-3">Logros</h4>
               <div className="mt-3 flex flex-col gap-2">
@@ -456,7 +435,6 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* Preferencias (Resumen) */}
             <div className={`${cardClass} p-4`}>
               <h4 className="font-bold text-lg mb-3">Preferencias</h4>
               <div className="mt-3 text-sm text-slate-600 dark:text-slate-400 space-y-2">
