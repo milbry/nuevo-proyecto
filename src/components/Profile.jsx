@@ -1,7 +1,7 @@
-// src/components/Profile.jsx
+// src/components/Profile.jsx (Versión de Emergencia sin Iconos)
 
 import React, { useEffect, useState, useRef } from "react";
-// Solo importamos auth y db
+// Se eliminan todas las importaciones de react-icons para evitar el error de caché/SyntaxError
 import { auth, db } from "../firebase.js"; 
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -16,17 +16,6 @@ import {
   deleteDoc,
   serverTimestamp,
 } from "firebase/firestore";
-
-// Importaciones Individuales de Iconos (Corregido para evitar el error de caché/SyntaxError de Vite)
-import { FiUploadCloud } from "react-icons/fi";
-import { FiTrash2 } from "react-icons/fi";
-import { FiSave } from "react-icons/fi";
-import { FiEdit3 } from "react-icons/fi";
-import { FiLock } from "react-icons/fi";
-import { FiUnlock } from "react-icons/fi";
-import { FiInstagram } from "react-icons/fi";
-import { FiWhatsapp } from "react-icons/fi"; // <-- Este es el que fallaba, ahora importado correctamente
-import { FiRefreshCw } from "react-icons/fi"; 
 
 // --- URLs de Marcador de Posición ---
 const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
@@ -52,8 +41,6 @@ export default function Profile() {
   const [profileData, setProfileData] = useState(initialProfileState);
   const [originalProfileData, setOriginalProfileData] = useState(initialProfileState);
   
-  const [isUploadingAvatar] = useState(false);
-  const [isUploadingCover] = useState(false);
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
   
   const [gallery, setGallery] = useState([]);
@@ -134,13 +121,13 @@ export default function Profile() {
   // --- FUNCIÓNES DE ARCHIVOS SIMULADAS (NO USAN FIREBASE STORAGE) ---
   
   async function handleAvatarChange(file) {
-    alert("¡AVISO! La subida de archivos está desactivada (Firebase Storage no está activo).");
+    alert("¡AVISO! La subida de archivos está desactivada.");
     const tempUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop"; 
     await setDoc(doc(db, "profiles", user.uid), { photoURL: tempUrl }, { merge: true });
   }
 
   async function handleCoverChange(file) {
-    alert("¡AVISO! La subida de archivos está desactivada (Firebase Storage no está activo).");
+    alert("¡AVISO! La subida de archivos está desactivada.");
     const tempUrl = "https://images.unsplash.com/photo-1557683315-328639014f3b?q=80&w=1600&auto=format&fit=crop"; 
     await setDoc(doc(db, "profiles", user.uid), { coverURL: tempUrl }, { merge: true });
   }
@@ -233,6 +220,14 @@ export default function Profile() {
   const cardClass = isDark ? "bg-gray-800 shadow-lg text-white" : "bg-white shadow-lg";
   const inputClass = isDark ? "p-3 border rounded border-gray-700 bg-gray-700 text-white" : "p-3 border rounded";
   const primaryButtonClass = "bg-green-700 hover:bg-green-600 text-white transition duration-150";
+  
+  // --- Reemplazo de Iconos ---
+  const IconoCandado = profileData.public ? "🔓" : "🔒";
+  const IconoGuardar = "💾";
+  const IconoInstagram = "📸";
+  const IconoWhatsapp = "💬";
+  const IconoSubir = "📤";
+  const IconoEliminar = "🗑️";
 
   return (
     <div className={`min-h-screen pb-12 ${themeClass}`}>
@@ -243,11 +238,8 @@ export default function Profile() {
           <div style={{ backgroundImage: `url(${profileData.coverURL})` }}
             className="h-56 bg-cover bg-center rounded-b-2xl shadow-md" />
           <label className={`absolute right-6 top-4 ${cardClass.split(' ')[0]} ${cardClass.split(' ')[2]} text-sm px-3 py-1 rounded-full cursor-pointer flex items-center gap-2 hover:bg-opacity-90 transition`}>
-            <span className="text-red-500">❌ Desactivado</span>
-            <input ref={coverInputRef} type="file" className="hidden" 
-                   accept="image/*"
-                   disabled={true} 
-                   onChange={e => handleCoverChange(e.target.files?.[0])} />
+            <span className="text-red-500">❌ Portada Desactivada</span>
+            <input ref={coverInputRef} type="file" className="hidden" accept="image/*" disabled={true} onChange={e => handleCoverChange(e.target.files?.[0])} />
           </label>
         </div>
 
@@ -264,10 +256,7 @@ export default function Profile() {
                 />
                 <label className={`absolute right-0 bottom-0 ${primaryButtonClass} text-white text-xs px-2 py-1 rounded-full cursor-pointer flex items-center gap-1`}>
                   <span className="text-red-500">❌</span>
-                  <input ref={fileInputRef} type="file" className="hidden" 
-                         accept="image/*"
-                         disabled={true} 
-                         onChange={e => handleAvatarChange(e.target.files?.[0])} />
+                  <input ref={fileInputRef} type="file" className="hidden" disabled={true} onChange={e => handleAvatarChange(e.target.files?.[0])} />
                 </label>
               </div>
 
@@ -301,14 +290,14 @@ export default function Profile() {
                 <div className="flex gap-3">
                   <button onClick={() => handleChange('public', !profileData.public)} 
                           className={`px-3 py-1 rounded flex items-center gap-1 transition duration-150 ${profileData.public ? "border border-green-600 text-green-700 bg-green-100 dark:bg-green-900/50 dark:text-green-300" : "border border-red-600 text-red-700 bg-red-100 dark:bg-red-900/50 dark:text-red-300"}`}>
-                    {profileData.public ? <FiUnlock className="w-4 h-4" /> : <FiLock className="w-4 h-4" />}
+                    {IconoCandado}
                     {profileData.public ? "Público" : "Privado"}
                   </button>
                   
                   <button onClick={saveProfile} 
                           disabled={!hasChanges}
                           className={`${primaryButtonClass} px-4 py-1 rounded flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}>
-                    <FiSave className="w-4 h-4" />
+                    {IconoGuardar}
                     {hasChanges ? "Guardar Cambios" : "Guardado"}
                   </button>
                 </div>
@@ -320,14 +309,14 @@ export default function Profile() {
                 {profileData.whatsappNumber && (
                     <a className="text-sm px-3 py-1 border rounded flex items-center gap-1 text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-gray-700 transition" 
                        href={getWhatsappLink()} target="_blank" rel="noreferrer">
-                        <FiWhatsapp className="w-4 h-4" /> WhatsApp
+                        {IconoWhatsapp} WhatsApp
                     </a>
                 )}
                 
                 {profileData.instagramUrl && (
                     <a className="text-sm px-3 py-1 border rounded flex items-center gap-1 text-pink-600 border-pink-600 hover:bg-pink-50 dark:hover:bg-gray-700 transition" 
                        href={getInstagramLink()} target="_blank" rel="noreferrer">
-                        <FiInstagram className="w-4 h-4" /> Instagram
+                        {IconoInstagram} Instagram
                     </a>
                 )}
                 
@@ -381,7 +370,7 @@ export default function Profile() {
             <div className="flex justify-between items-center mb-4 border-b pb-3 border-gray-100 dark:border-gray-700">
               <h3 className="text-2xl font-bold">Galería ({gallery.length})</h3>
               <button onClick={handleGalleryUpload} className={`${primaryButtonClass} px-4 py-2 rounded-full cursor-pointer flex items-center gap-2`}>
-                <FiUploadCloud className="w-4 h-4" /> Añadir Foto Fija
+                {IconoSubir} Añadir Foto Fija
               </button>
             </div>
 
@@ -400,7 +389,7 @@ export default function Profile() {
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
                       <button onClick={() => removeGalleryItem(item)} 
                               className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-full text-sm flex items-center gap-1 transition transform hover:scale-110">
-                        <FiTrash2 className="w-4 h-4" /> Eliminar (Firestore)
+                        {IconoEliminar} Eliminar (Firestore)
                       </button>
                     </div>
                   </motion.div>
@@ -415,9 +404,9 @@ export default function Profile() {
             <div className={`${cardClass} p-4`}>
               <h4 className="font-bold text-lg mb-3">Actividad reciente</h4>
               <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2">
-                <li className="flex items-center gap-2"><span className="text-green-500">●</span> Has guardado el perfil.</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">●</span> Recibiste 12 likes en tu último post.</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">●</span> Completaste 2 retos.</li>
+                <li className="flex items-center gap-2">● Has guardado el perfil.</li>
+                <li className="flex items-center gap-2">● Recibiste 12 likes en tu último post.</li>
+                <li className="flex items-center gap-2">● Completaste 2 retos.</li>
               </ul>
             </div>
 
