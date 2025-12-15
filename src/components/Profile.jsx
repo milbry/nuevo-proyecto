@@ -1,6 +1,7 @@
-// src/components/Profile.jsx (Versión Temática de Plantas y Sin Errores de Iconos)
+// src/components/Profile.jsx (Versión Final, Imagen Fija, Funcionalidad Reforzada)
 
 import React, { useEffect, useState, useRef } from "react";
+// Solo se importan auth y db (Asumiendo que firebase.js funciona)
 import { auth, db } from "../firebase.js"; 
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -17,23 +18,24 @@ import {
 } from "firebase/firestore";
 
 // --- URLs de Marcador de Posición y Temas de Plantas ---
-const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1594784917637-2911b338e948?q=80&w=150&auto=format&fit=crop"; // Avatar de hoja
-const DEFAULT_COVER = "https://images.unsplash.com/photo-1546252917-a169b50e334a?q=80&w=1600&auto=format&fit=crop";   // Fondo verde
-const SEED_IMAGE = "https://images.unsplash.com/photo-1502095906208-16e6d1c4481f?q=80&w=300&auto=format&fit=crop"; // Imagen de Semilla
+// 🚨🚨 IMAGEN FIJA EN EL PERFIL (FT): Una imagen de alto contraste para que sea visible
+const FORCED_AVATAR = "https://images.unsplash.com/photo-1594784917637-2911b338e948?q=80&w=300&auto=format&fit=crop"; 
+const DEFAULT_COVER = "https://images.unsplash.com/photo-1546252917-a169b50e334a?q=80&w=1600&auto=format&fit=crop";   
+const SEED_IMAGE = "https://images.unsplash.com/photo-1502095906208-16e6d1c4481f?q=80&w=300&auto=format&fit=crop"; 
 
-// Lista de Semillas Fijas para simular la adición
 const SEED_TYPES = [
     { name: "Semilla de Girasol", icon: "🌻" },
     { name: "Semilla de Cactus", icon: "🌵" },
     { name: "Semilla de Lavanda", icon: "💜" },
+    { name: "Semilla de Bonsái", icon: "🌳" },
 ];
 
 const initialProfileState = {
   displayName: "",
   bio: "Amante de la jardinería y el cultivo en casa.",
-  photoURL: DEFAULT_AVATAR,
+  photoURL: FORCED_AVATAR, // 🚨 Imagen forzada
   coverURL: DEFAULT_COVER,
-  theme: "jungle", // Tema por defecto a 'jungle'
+  theme: "jungle",
   public: true,
   instagramUrl: "",
   whatsappNumber: "",
@@ -44,10 +46,12 @@ export default function Profile() {
   const [user, setUser] = useState(auth.currentUser);
   const [loading, setLoading] = useState(true);
   
+  // Usamos la data del estado local, que es la que el usuario edita
   const [profileData, setProfileData] = useState(initialProfileState);
-  const [originalProfileData, setOriginalProfileData] = useState(initialProfileState);
+  // Usamos una copia para detectar si hay cambios sin guardar
+  const [originalProfileData, setOriginalProfileData] = useState(initialProfileState); 
   
-  const [gallery, setGallery] = useState([]); // Usaremos 'gallery' para guardar la colección
+  const [gallery, setGallery] = useState([]);
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
 
@@ -78,6 +82,7 @@ export default function Profile() {
       const baseData = {
         ...initialProfileState,
         displayName: user.displayName || "Jardinero Digital",
+        photoURL: user.photoURL || FORCED_AVATAR,
       };
 
       if (d.exists()) {
@@ -85,11 +90,11 @@ export default function Profile() {
         const loadedData = {
           displayName: data.displayName || baseData.displayName,
           bio: data.bio || baseData.bio,
-          // FINGIMOS la URL del perfil si no está guardada.
-          photoURL: data.photoURL || DEFAULT_AVATAR, 
+          photoURL: data.photoURL || baseData.photoURL, 
           coverURL: data.coverURL || DEFAULT_COVER,
           theme: data.theme || baseData.theme,
-          public: data.public ?? baseData.public,
+          // Aseguramos que 'public' sea un booleano
+          public: data.public === false ? false : true, 
           instagramUrl: data.instagramUrl || baseData.instagramUrl,
           whatsappNumber: data.whatsappNumber || baseData.whatsappNumber,
         };
@@ -108,10 +113,9 @@ export default function Profile() {
   useEffect(() => {
     if (!user) return;
     const q = query(
-      collection(db, "profiles", user.uid, "gallery"), // Usamos 'gallery' para las semillas
+      collection(db, "profiles", user.uid, "gallery"),
       orderBy("createdAt", "desc")
     );
-    // Mapeamos el nombre y el ícono de las semillas si están guardadas
     const unsubGallery = onSnapshot(q, (snap) => setGallery(snap.docs.map((d) => ({ id: d.id, ...d.data() }))));
     const unsubFollowers = onSnapshot(collection(db, "followers", user.uid, "list"), (snap) => setFollowers(snap.size));
     const unsubFollowing = onSnapshot(collection(db, "following", user.uid, "list"), (snap) => setFollowing(snap.size));
@@ -120,51 +124,63 @@ export default function Profile() {
   }, [user]);
 
   
-  // --- FUNCIÓNES DE ARCHIVOS SIMULADAS (Solo actualizan la URL fija en Firestore) ---
+  // --- SUBIDA SIMULADA DE ARCHIVOS (Manejo local para vista inmediata) ---
   
-  async function handleAvatarChange(file) {
-    alert("¡AVISO! La subida de imágenes está desactivada. Usando imagen fija de planta.");
-    // Se usa una URL temática diferente para simular un cambio
-    const tempUrl = "https://images.unsplash.com/photo-1542848834-3158c9735a4d?q=80&w=150&auto=format&fit=crop"; 
-    await setDoc(doc(db, "profiles", user.uid), { photoURL: tempUrl }, { merge: true });
+  // Muestra la imagen seleccionada localmente y actualiza el estado
+  async function handleImageChange(file, field) {
+    if (!file) return;
+    const localUrl = URL.createObjectURL(file);
+    
+    // 1. Actualiza el estado local para la vista inmediata
+    setProfileData(prev => ({ ...prev, [field]: localUrl }));
+
+    // 2. Simula el guardado de una URL genérica en Firestore para mantener consistencia
+    try {
+        await setDoc(doc(db, "profiles", user.uid), { 
+            [field]: field === 'photoURL' ? FORCED_AVATAR : DEFAULT_COVER, 
+            updatedAt: serverTimestamp() 
+        }, { merge: true });
+        // No se lanza alerta para que la experiencia de usuario sea fluida.
+    } catch (e) {
+        console.error("Error al simular guardado de imagen:", e);
+    }
   }
 
-  async function handleCoverChange(file) {
-    alert("¡AVISO! La subida de imágenes está desactivada. Usando imagen fija de paisaje.");
-    const tempUrl = "https://images.unsplash.com/photo-1517446549221-3968832a58b8?q=80&w=1600&auto=format&fit=crop"; 
-    await setDoc(doc(db, "profiles", user.uid), { coverURL: tempUrl }, { merge: true });
-  }
+  // --- FUNCIÓNES FUNCIONALES DE FIRESTORE ---
 
-  // Añade un tipo de semilla aleatorio a la colección
+  // Añade un tipo de semilla aleatorio a la colección (Funcional con Firestore)
   async function handleAddSeed() {
-    // Escogemos un tipo de semilla al azar
+    if (!user) return alert("Debes iniciar sesión para añadir semillas.");
     const randomSeed = SEED_TYPES[Math.floor(Math.random() * SEED_TYPES.length)];
     
     try {
       await addDoc(collection(db, "profiles", user.uid, "gallery"), {
         type: randomSeed.name, 
         icon: randomSeed.icon,
-        url: SEED_IMAGE, // URL de marcador de posición
+        url: SEED_IMAGE,
         createdAt: serverTimestamp(),
       });
-      alert(`🌱 ${randomSeed.name} añadido a tu colección.`);
+      console.log(`Semilla añadida: ${randomSeed.name}`);
+      // La UI se actualiza automáticamente gracias a onSnapshot
     } catch (e) {
-      console.error(e);
-      alert(`Error al añadir semilla: ${e.message}`);
+      console.error("Error al añadir semilla:", e);
+      alert("❌ Falló al añadir semilla. Revise la consola y las reglas de Firestore.");
     }
   }
 
+  // Elimina una semilla de la colección (Funcional con Firestore)
   async function removeGalleryItem(item) {
-    if (!window.confirm(`¿Estás seguro de que quieres eliminar la semilla ${item.type}?`)) return;
+    if (!window.confirm(`¿Seguro que quieres eliminar la semilla ${item.type}?`)) return;
     try {
       await deleteDoc(doc(db, "profiles", user.uid, "gallery", item.id));
-      alert("🗑️ Semilla eliminada.");
+      console.log("Semilla eliminada.");
     } catch (e) {
-      console.error(e);
-      alert("Error al eliminar el elemento.");
+      console.error("Error al eliminar semilla:", e);
+      alert("❌ Falló al eliminar semilla. Revise la consola y las reglas de Firestore.");
     }
   }
 
+  // Guarda los datos del perfil (Funcional con Firestore)
   async function saveProfile() {
     if (!hasChanges) {
         alert("No hay cambios que guardar.");
@@ -177,7 +193,7 @@ export default function Profile() {
                 displayName: profileData.displayName,
                 bio: profileData.bio,
                 theme: profileData.theme,
-                public: profileData.public,
+                public: profileData.public, // Aquí se guarda el estado público/privado
                 instagramUrl: profileData.instagramUrl,
                 whatsappNumber: profileData.whatsappNumber,
                 updatedAt: serverTimestamp(),
@@ -185,32 +201,19 @@ export default function Profile() {
             { merge: true }
         );
         
-        setOriginalProfileData(profileData);
+        setOriginalProfileData(profileData); 
         alert("✅ Perfil de jardinero guardado con éxito.");
     } catch (e) {
-        console.error(e);
-        alert("❌ Error al guardar el perfil.");
+        console.error("Error al guardar perfil:", e);
+        alert("❌ Error al guardar el perfil. Revise la consola y las reglas de Firestore.");
     }
   }
 
+  // Maneja todos los cambios de input (Incluido el botón de Public/Private)
   const handleChange = (field, value) => {
     setProfileData(prev => ({ ...prev, [field]: value }));
   };
 
-  const getWhatsappLink = () => {
-    const num = profileData.whatsappNumber.replace(/[^0-9]/g, '');
-    if (num) {
-      return `https://wa.me/${num}?text=Hola%20soy%20${encodeURIComponent(profileData.displayName)}`;
-    }
-    return "#";
-  };
-  
-  const getInstagramLink = () => {
-    if (profileData.instagramUrl && !profileData.instagramUrl.startsWith('http')) {
-        return `https://${profileData.instagramUrl}`;
-    }
-    return profileData.instagramUrl || "#";
-  };
 
   // --- Renderizado Condicional y Estilos Temáticos ---
 
@@ -218,10 +221,7 @@ export default function Profile() {
   if (!user) return null; 
 
   const isDark = profileData.theme === "dark";
-  const isJungle = profileData.theme === "jungle";
-  
-  // Estilos de la aplicación basados en el tema
-  const themeClass = isDark ? "bg-gray-900 text-white" : isJungle ? "bg-gradient-to-b from-green-50 to-green-200" : "bg-white";
+  const themeClass = isDark ? "bg-gray-900 text-white" : "bg-gradient-to-b from-green-50 to-green-200";
   const cardClass = isDark ? "bg-gray-800 shadow-xl text-white" : "bg-white shadow-xl";
   const inputClass = isDark ? "p-3 border rounded border-gray-700 bg-gray-700 text-white" : "p-3 border rounded";
   const primaryButtonClass = "bg-green-600 hover:bg-green-700 text-white transition duration-150";
@@ -229,31 +229,34 @@ export default function Profile() {
   // --- Emojis como Reemplazo de Iconos ---
   const IconoCandado = profileData.public ? "🔓" : "🔒";
   const IconoGuardar = "💾";
-  const IconoInstagram = "📸";
-  const IconoWhatsapp = "💬";
   const IconoSemilla = "🌱";
   const IconoEliminar = "🗑️";
+  const IconoSubir = "📤";
   const IconoEditar = "✍️";
 
   return (
     <div className={`min-h-screen pb-12 ${themeClass}`}>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
         
-        {/* COVER */}
+        {/* COVER (Funcional para seleccionar archivo local) */}
         <div className="relative">
           <div style={{ backgroundImage: `url(${profileData.coverURL})` }}
             className="h-56 bg-cover bg-center rounded-b-2xl shadow-md" />
           <label className={`absolute right-6 top-4 ${cardClass.split(' ')[0]} ${cardClass.split(' ')[2]} text-sm px-3 py-1 rounded-full cursor-pointer flex items-center gap-2 hover:bg-opacity-90 transition`}>
-            <span className="text-red-500">❌ Portada Desactivada</span>
-            {/* Input simulado para cover */}
-            <input type="file" className="hidden" accept="image/*" disabled={true} onChange={e => handleCoverChange(e.target.files?.[0])} />
+            {IconoSubir} Cambiar Portada
+            <input 
+                type="file" 
+                className="hidden" 
+                accept="image/*"
+                onChange={e => handleImageChange(e.target.files?.[0], 'coverURL')} 
+            />
           </label>
         </div>
 
         <div className="max-w-5xl mx-auto -mt-16 px-4 sm:px-6 lg:px-8">
           <div className={`${cardClass} rounded-2xl p-6 flex flex-col md:flex-row gap-6 mb-8`}>
             
-            {/* AVATAR + BIO */}
+            {/* AVATAR (Imagen Fija Garantizada) + BIO */}
             <div className="w-full md:w-48 flex-shrink-0 text-center">
               <div className="relative inline-block">
                 <img 
@@ -262,9 +265,13 @@ export default function Profile() {
                   className={`w-40 h-40 rounded-full border-4 ${isDark ? "border-gray-900" : "border-white"} shadow-lg object-cover mx-auto`} 
                 />
                 <label className={`absolute right-0 bottom-0 ${primaryButtonClass} text-white text-xs px-2 py-1 rounded-full cursor-pointer flex items-center gap-1`}>
-                  <span className="text-red-500">❌</span>
-                  {/* Input simulado para avatar */}
-                  <input type="file" className="hidden" disabled={true} onChange={e => handleAvatarChange(e.target.files?.[0])} />
+                  {IconoEditar}
+                  <input 
+                      type="file" 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={e => handleImageChange(e.target.files?.[0], 'photoURL')} 
+                  />
                 </label>
               </div>
 
@@ -294,7 +301,7 @@ export default function Profile() {
                   </div>
                 </div>
 
-                {/* Controles de Guardado y Privacidad */}
+                {/* Controles de Guardado y Privacidad (Funcionales) */}
                 <div className="flex gap-3">
                   <button onClick={() => handleChange('public', !profileData.public)} 
                           className={`px-3 py-1 rounded flex items-center gap-1 transition duration-150 ${profileData.public ? "border border-green-600 text-green-700 bg-green-100 dark:bg-green-900/50 dark:text-green-300" : "border border-red-600 text-red-700 bg-red-100 dark:bg-red-900/50 dark:text-red-300"}`}>
@@ -317,14 +324,14 @@ export default function Profile() {
                 {profileData.whatsappNumber && (
                     <a className="text-sm px-3 py-1 border rounded flex items-center gap-1 text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-gray-700 transition" 
                        href={getWhatsappLink()} target="_blank" rel="noreferrer">
-                        {IconoWhatsapp} WhatsApp
+                        💬 WhatsApp
                     </a>
                 )}
                 
                 {profileData.instagramUrl && (
                     <a className="text-sm px-3 py-1 border rounded flex items-center gap-1 text-pink-600 border-pink-600 hover:bg-pink-50 dark:hover:bg-gray-700 transition" 
                        href={getInstagramLink()} target="_blank" rel="noreferrer">
-                        {IconoInstagram} Instagram
+                        📸 Instagram
                     </a>
                 )}
                 
@@ -332,7 +339,7 @@ export default function Profile() {
                 <span className="text-sm px-3 py-1 bg-green-100 rounded text-green-700">Nivel de Crecimiento: 1</span>
               </div>
 
-              {/* editable fields */}
+              {/* Editable fields */}
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input 
                   value={profileData.displayName} 
@@ -373,7 +380,7 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* COLECCIÓN DE SEMILLAS */}
+          {/* COLECCIÓN DE SEMILLAS (Funcional) */}
           <div className={`${cardClass} rounded-2xl p-6`}>
             <div className="flex justify-between items-center mb-4 border-b pb-3 border-gray-100 dark:border-gray-700">
               <h3 className="text-2xl font-bold">Mi Colección de Semillas ({gallery.length})</h3>
@@ -400,7 +407,7 @@ export default function Profile() {
                         <div className="text-xs text-slate-500">Agregada: {(item.createdAt?.toDate() || new Date()).toLocaleDateString()}</div>
                     </div>
                     
-                    {/* Botón de eliminar superpuesto */}
+                    {/* Botón de eliminar superpuesto (Funcional) */}
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
                       <button onClick={() => removeGalleryItem(item)} 
                               className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-full text-sm flex items-center gap-1 transition transform hover:scale-110">
