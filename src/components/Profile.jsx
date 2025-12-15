@@ -18,8 +18,18 @@ import {
 } from "firebase/firestore";
 // Eliminamos todas las importaciones de Firebase Storage (ref, uploadBytesResumable, getDownloadURL, deleteObject)
 
-import { FiUploadCloud, FiTrash2, FiSave, FiEdit3, FiLock, FiUnlock, FiInstagram, FiWhatsapp, FiRefreshCw } from "react-icons/fi"; 
-
+// --- Importación de React Icons (Corregida) ---
+// Tuvimos que importar cada icono por separado para evitar el error 'FiWhatsapp'
+import { FiUploadCloud } from "react-icons/fi";
+import { FiTrash2 } from "react-icons/fi";
+import { FiSave } from "react-icons/fi";
+import { FiEdit3 } from "react-icons/fi";
+import { FiLock } from "react-icons/fi";
+import { FiUnlock } from "react-icons/fi";
+import { FiInstagram } from "react-icons/fi";
+import { FiWhatsapp } from "react-icons/fi";
+import { FiRefreshCw } from "react-icons/fi";
+// ---------------------------------------------
 // --- URLs de Marcador de Posición ---
 const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1600&q=60";
