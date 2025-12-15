@@ -1,4 +1,4 @@
-// src/components/Profile.jsx (Versión Final y Diseño Ajustado V3)
+// src/components/Profile.jsx (Versión FINAL con Diseño Corregido y Funcionalidad OK)
 
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../firebase.js"; 
@@ -247,8 +247,8 @@ export default function Profile() {
           </label>
         </div>
 
-        {/* CONTENIDO PRINCIPAL - MARGEN AUMENTADO A -mt-32 */}
-        <div className="max-w-5xl mx-auto -mt-32 px-4 sm:px-6 lg:px-8">
+        {/* CONTENIDO PRINCIPAL - MARGEN A -mt-28 */}
+        <div className="max-w-5xl mx-auto -mt-28 px-4 sm:px-6 lg:px-8">
           <div className={`${cardClass} rounded-2xl p-8 flex flex-col md:flex-row gap-8 mb-8`}>
             
             {/* AVATAR + BIO */}
@@ -277,7 +277,8 @@ export default function Profile() {
             </div>
 
             {/* INFO PRINCIPAL + ESTADÍSTICAS */}
-            <div className="flex-1 pt-4 md:pt-0">
+            {/* AGREGADO pt-8 PARA SEPARAR EL CONTENIDO DE LA IMAGEN DE ARRIBA */}
+            <div className="flex-1 pt-8 md:pt-0"> 
               <div className="flex flex-col md:flex-row justify-between items-start mb-6">
                 
                 {/* Estadísticas */}
