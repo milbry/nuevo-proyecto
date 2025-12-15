@@ -1,6 +1,5 @@
-// --- src/data.js ---
 
-export const PRODUCTS = [
+export const PLANTS = [
   {
     id: '1',
     name: 'Monstera Deliciosa',
