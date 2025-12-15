@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { PLANTS } from './data.js';
+import { PRODUCTS } from './data.js'; // CAMBIO AQUÍ
 import Card from './Card.jsx';
 
 export default function Grid(){
+  // ... lógica igual
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('All');
-  const cats = ['All', ...Array.from(new Set(PLANTS.map(p => p.category)))];
-  const filtered = PLANTS.filter(p => (cat === 'All' || p.category === cat) && (q === '' || p.name.toLowerCase().includes(q.toLowerCase())));
+  const cats = ['All', ...Array.from(new Set(PRODUCTS.map(p => p.category)))]; // CAMBIO AQUÍ
+  const filtered = PRODUCTS.filter(p => (cat === 'All' || p.category === cat) && (q === '' || p.name.toLowerCase().includes(q.toLowerCase()))); // CAMBIO AQUÍ
   return (
     <div>
       <div className="flex gap-3 mb-4">
