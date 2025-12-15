@@ -1,5 +1,37 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion"; // Importamos motion para las animaciones
+import { motion } from "framer-motion"; 
+
+// --- Nuevos datos de productos para la Tienda Premium ---
+const premiumProducts = [
+  {
+    id: 1,
+    name: "Kit de Sustrato VIP",
+    desc: "Mezcla aireada y nutritiva para crecimiento explosivo.",
+    price: "$29.99",
+    discount: "30% OFF",
+    icon: "🎁",
+    link: "https://www.amazon.com/s?k=sustrato+premium+plantas" 
+  },
+  {
+    id: 2,
+    name: "Lámpara LED Full Spectrum",
+    desc: "Luz de crecimiento profesional, ideal para interiores.",
+    price: "$49.99",
+    discount: "Envío Gratis",
+    icon: "💡",
+    link: "https://www.amazon.com/s?k=lampara+crecimiento+plantas" 
+  },
+  {
+    id: 3,
+    name: "E-book: Bonsái para Expertos",
+    desc: "Guía digital para el arte milenario del bonsái (PDF).",
+    price: "$12.50",
+    discount: "Precio especial",
+    icon: "📚",
+    link: "https://www.amazon.com/s?k=libro+bonsai+avanzado" 
+  },
+];
+// --------------------------------------------------------
 
 export default function PrivateZone() {
   const [humidity, setHumidity] = useState(40);
@@ -17,12 +49,11 @@ export default function PrivateZone() {
   const [potSize, setPotSize] = useState("");
   const [wateringResult, setWateringResult] = useState("");
   
-  // NUEVOS ESTADOS
   const [fertilizerType, setFertilizerType] = useState("");
   const [area, setArea] = useState("");
   const [fertilizerDose, setFertilizerDose] = useState("");
   const [timerRunning, setTimerRunning] = useState(false);
-  const [time, setTime] = useState(0); // Tiempo en segundos
+  const [time, setTime] = useState(0); 
 
   const [quizStep, setQuizStep] = useState(0);
   const [quizAnswers, setQuizAnswers] = useState([]);
@@ -97,7 +128,6 @@ export default function PrivateZone() {
       setWateringResult("Ingresa un número válido para el tamaño (cm) 🌱");
       return;
     }
-    // Fórmula: 10 ml por cm de diámetro de maceta (Ej: 10cm = 100ml)
     setWateringResult(`💧 ${potSizeValue * 10} ml de agua recomendados (por semana, aprox.)`);
   };
 
@@ -166,7 +196,7 @@ export default function PrivateZone() {
               style={{ borderRadius: "12px" }}
               src="https://open.spotify.com/embed/playlist/37i9dQZF1DX4wta20PHgwo"
               width="100%"
-              height="250" // Altura ajustada para el layout de 3 columnas
+              height="250" 
               allow="encrypted-media"
               title="Spotify Playlist 1"
             />
@@ -181,7 +211,7 @@ export default function PrivateZone() {
               style={{ borderRadius: "12px" }}
               src="https://open.spotify.com/embed/playlist/37i9dQZF1DX4y8h9WqDPAE"
               width="100%"
-              height="250" // Altura ajustada
+              height="250" 
               allow="encrypted-media"
               title="Spotify Playlist 2"
             />
@@ -195,14 +225,16 @@ export default function PrivateZone() {
             <p className="text-sm text-gray-600 mb-3">
                 Tu ubicación: Ciudad de México.
             </p>
-            {/* SIMULACIÓN DE MAPA/WIDGET */}
-            <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center text-gray-700 text-center">
+            <div className="w-full h-48 bg-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-700 text-center p-4">
                 
                 <span className="font-bold text-sm">
                     Temperatura: 25°C. Humedad: 55%.
                     <br/>
                     Próximo Riego: Mañana.
                 </span>
+                <button className="text-xs bg-green-500 text-white px-3 py-1 rounded-full mt-2 hover:bg-green-600 transition">
+                    Ver Pronóstico Extendido
+                </button>
             </div>
           </div>
 
@@ -244,7 +276,7 @@ export default function PrivateZone() {
             )}
           </div>
 
-          {/* CALCULADORA DE FERTILIZANTE (NUEVO) */}
+          {/* CALCULADORA DE FERTILIZANTE */}
           <div className={`${cardClass}`}>
             <h3 className="font-bold text-green-700 mb-2 text-xl">
               🧪 Calculadora de Nutrientes
@@ -318,7 +350,7 @@ export default function PrivateZone() {
             <p className="mt-4 text-center text-lg font-semibold text-green-900">{humidity}% — {humidityMsg}</p>
           </div>
           
-          {/* TEMPORIZADOR DE TAREAS (NUEVO) */}
+          {/* TEMPORIZADOR DE TAREAS */}
           <div className={`${cardClass}`}>
             <h3 className="font-bold text-green-700 mb-2 text-xl">⏱️ Temporizador de Tareas</h3>
             <div className="text-4xl font-bold text-center text-green-800 mb-3">
@@ -354,6 +386,43 @@ export default function PrivateZone() {
             )}
           </div>
 
+          {/* OFERTAS PREMIUM MEJORADAS (NUEVA ESTRUCTURA) */}
+          <div className={`${cardClass} md:col-span-2 lg:col-span-3`}>
+            <h3 className="font-bold text-green-700 mb-4 text-3xl flex items-center gap-3">
+              🛍️ Tienda Premium Exclusiva
+            </h3>
+            <p className="text-gray-600 mb-4">Acceso a los mejores productos con descuento solo para miembros VIP.</p>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {premiumProducts.map(product => (
+                    <motion.div 
+                        key={product.id} 
+                        className="border border-green-300 p-4 rounded-xl bg-green-50 hover:shadow-xl transition duration-300"
+                        whileHover={{ scale: 1.02 }}
+                    >
+                        <div className="text-5xl text-center mb-3">{product.icon}</div>
+                        <h4 className="font-bold text-lg text-green-800 text-center">{product.name}</h4>
+                        <p className="text-xs text-gray-500 text-center mb-2">{product.desc}</p>
+                        
+                        <div className="flex justify-center items-baseline mb-3">
+                            <span className="text-2xl font-extrabold text-green-900 mr-2">{product.price}</span>
+                            <span className="text-sm text-red-600 font-semibold bg-red-100 px-2 py-0.5 rounded-full">{product.discount}</span>
+                        </div>
+                        
+                        <a
+                            href={product.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block text-center bg-yellow-500 text-white font-semibold py-2 rounded-lg hover:bg-yellow-600 transition"
+                        >
+                            Ver Producto y Comprar
+                        </a>
+                    </motion.div>
+                ))}
+            </div>
+          </div>
+          {/* FIN OFERTAS PREMIUM */}
+          
           {/* MINI TEST (QUÉ PLANTA ERES) */}
           <div className={`${cardClass} md:col-span-2 lg:col-span-3`}>
             <h3 className="font-bold text-green-700 mb-3 text-xl">
@@ -401,30 +470,6 @@ export default function PrivateZone() {
                 🎉 Tu planta es: {quizResult}
               </p>
             )}
-          </div>
-
-          {/* OFERTAS PREMIUM (NUEVO) */}
-          <div className={`${cardClass} md:col-span-2 lg:col-span-3`}>
-            <h3 className="font-bold text-green-700 mb-4 text-xl">
-              💰 Ofertas Exclusivas (Tienda Premium)
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="border border-green-300 p-4 rounded-lg text-center bg-green-50 hover:shadow-md transition cursor-pointer">
-                    <p className="text-4xl">🎁</p>
-                    <p className="font-bold mt-2">Kit de Sustrato VIP</p>
-                    <p className="text-sm text-red-600">30% OFF</p>
-                </div>
-                <div className="border border-green-300 p-4 rounded-lg text-center bg-green-50 hover:shadow-md transition cursor-pointer">
-                    <p className="text-4xl">💡</p>
-                    <p className="font-bold mt-2">Lámpara LED Full Spectrum</p>
-                    <p className="text-sm text-red-600">Envío Gratis</p>
-                </div>
-                <div className="border border-green-300 p-4 rounded-lg text-center bg-green-50 hover:shadow-md transition cursor-pointer">
-                    <p className="text-4xl">📚</p>
-                    <p className="font-bold mt-2">E-book: Bonsái para Expertos</p>
-                    <p className="text-sm text-red-600">Precio especial</p>
-                </div>
-            </div>
           </div>
           
           {/* GUÍA PDF */}
