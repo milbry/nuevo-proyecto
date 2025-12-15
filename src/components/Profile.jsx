@@ -1,4 +1,4 @@
-// src/components/Profile.jsx (Versión Final, Imagen Fija, Funcionalidad Reforzada y SINTAXIS CORREGIDA)
+// src/components/Profile.jsx (Versión Final y Diseño Ajustado)
 
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../firebase.js"; 
@@ -51,7 +51,7 @@ export default function Profile() {
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
 
-  // --- Funciones de utilidad DEBEN ir dentro del componente ---
+  // --- Funciones de utilidad ---
   const getWhatsappLink = () => {
     const num = profileData.whatsappNumber.replace(/[^0-9]/g, '');
     if (num) {
@@ -117,9 +117,7 @@ export default function Profile() {
         setOriginalProfileData(baseData);
       }
     }, (error) => {
-        // 🚨 Captura de error de permiso para el perfil principal
-        console.error("Error al escuchar el perfil (Necesita reglas de seguridad):", error);
-        // Podemos seguir usando el estado local si falla
+        console.error("Error al escuchar el perfil (Problema de Reglas):", error);
     });
 
     return () => unsubProfile();
@@ -133,11 +131,9 @@ export default function Profile() {
       orderBy("createdAt", "desc")
     );
     const unsubGallery = onSnapshot(q, (snap) => setGallery(snap.docs.map((d) => ({ id: d.id, ...d.data() }))), (error) => {
-        // 🚨 Captura de error de permiso para la galería
-        console.error("Error al escuchar la galería (Necesita reglas de seguridad):", error);
+        console.error("Error al escuchar la galería (Problema de Reglas):", error);
     });
     
-    // Asumiendo que contadores también dan error, los mantenemos simples
     const unsubFollowers = onSnapshot(collection(db, "followers", user.uid, "list"), (snap) => setFollowers(snap.size));
     const unsubFollowing = onSnapshot(collection(db, "following", user.uid, "list"), (snap) => setFollowing(snap.size));
     
@@ -145,16 +141,14 @@ export default function Profile() {
   }, [user]);
 
   
-  // --- SUBIDA SIMULADA DE ARCHIVOS (Manejo local para vista inmediata) ---
+  // --- SUBIDA SIMULADA DE ARCHIVOS (Solo muestra la imagen local) ---
   function handleImageChange(file, field) {
     if (!file) return;
     const localUrl = URL.createObjectURL(file);
     setProfileData(prev => ({ ...prev, [field]: localUrl }));
-    // No se simula el guardado en Firestore para evitar más errores de permisos.
-    // La imagen se verá, pero solo hasta que recargue la página.
   }
 
-  // --- FUNCIÓNES FUNCIONALES DE FIRESTORE (Añadir Semilla) ---
+  // --- FUNCIÓNES FUNCIONALES DE FIRESTORE ---
 
   async function handleAddSeed() {
     if (!user) return alert("Debes iniciar sesión para añadir semillas.");
@@ -167,26 +161,22 @@ export default function Profile() {
         url: SEED_IMAGE,
         createdAt: serverTimestamp(),
       });
-      alert(`🌱 ${randomSeed.name} añadida con éxito (si las reglas lo permiten).`);
     } catch (e) {
       console.error("Error al añadir semilla:", e);
       alert("❌ Falló al añadir semilla. ¡REVISE SUS REGLAS DE SEGURIDAD!");
     }
   }
 
-  // Elimina una semilla (Funcional con Firestore)
   async function removeGalleryItem(item) {
     if (!window.confirm(`¿Seguro que quieres eliminar la semilla ${item.type}?`)) return;
     try {
       await deleteDoc(doc(db, "profiles", user.uid, "gallery", item.id));
-      // La UI se actualiza automáticamente
     } catch (e) {
       console.error("Error al eliminar semilla:", e);
       alert("❌ Falló al eliminar semilla. ¡REVISE SUS REGLAS DE SEGURIDAD!");
     }
   }
 
-  // Guarda los datos del perfil (Funcional con Firestore)
   async function saveProfile() {
     if (!hasChanges) {
         alert("No hay cambios que guardar.");
@@ -215,7 +205,6 @@ export default function Profile() {
     }
   }
 
-  // Maneja todos los cambios de input (Incluido el botón de Public/Private)
   const handleChange = (field, value) => {
     setProfileData(prev => ({ ...prev, [field]: value }));
   };
@@ -258,8 +247,9 @@ export default function Profile() {
           </label>
         </div>
 
-        <div className="max-w-5xl mx-auto -mt-16 px-4 sm:px-6 lg:px-8">
-          <div className={`${cardClass} rounded-2xl p-6 flex flex-col md:flex-row gap-6 mb-8`}>
+        {/* CONTENIDO PRINCIPAL - AUMENTADO MARGEN -mt-24 */}
+        <div className="max-w-5xl mx-auto -mt-24 px-4 sm:px-6 lg:px-8">
+          <div className={`${cardClass} rounded-2xl p-8 flex flex-col md:flex-row gap-8 mb-8`}>
             
             {/* AVATAR + BIO */}
             <div className="w-full md:w-48 flex-shrink-0 text-center">
