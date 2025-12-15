@@ -1,7 +1,6 @@
-// src/components/Profile.jsx (Versión Final, Imagen Fija, Funcionalidad Reforzada)
+// src/components/Profile.jsx (Versión Final, Imagen Fija, Funcionalidad Reforzada y SINTAXIS CORREGIDA)
 
-import React, { useEffect, useState, useRef } from "react";
-// Solo se importan auth y db (Asumiendo que firebase.js funciona)
+import React, { useEffect, useState } from "react";
 import { auth, db } from "../firebase.js"; 
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -17,8 +16,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-// --- URLs de Marcador de Posición y Temas de Plantas ---
-// 🚨🚨 IMAGEN FIJA EN EL PERFIL (FT): Una imagen de alto contraste para que sea visible
+// --- URLs de Marcador de Posición ---
 const FORCED_AVATAR = "https://images.unsplash.com/photo-1594784917637-2911b338e948?q=80&w=300&auto=format&fit=crop"; 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1546252917-a169b50e334a?q=80&w=1600&auto=format&fit=crop";   
 const SEED_IMAGE = "https://images.unsplash.com/photo-1502095906208-16e6d1c4481f?q=80&w=300&auto=format&fit=crop"; 
@@ -33,7 +31,7 @@ const SEED_TYPES = [
 const initialProfileState = {
   displayName: "",
   bio: "Amante de la jardinería y el cultivo en casa.",
-  photoURL: FORCED_AVATAR, // 🚨 Imagen forzada
+  photoURL: FORCED_AVATAR,
   coverURL: DEFAULT_COVER,
   theme: "jungle",
   public: true,
@@ -46,14 +44,29 @@ export default function Profile() {
   const [user, setUser] = useState(auth.currentUser);
   const [loading, setLoading] = useState(true);
   
-  // Usamos la data del estado local, que es la que el usuario edita
   const [profileData, setProfileData] = useState(initialProfileState);
-  // Usamos una copia para detectar si hay cambios sin guardar
   const [originalProfileData, setOriginalProfileData] = useState(initialProfileState); 
   
   const [gallery, setGallery] = useState([]);
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
+
+  // --- Funciones de utilidad DEBEN ir dentro del componente ---
+  const getWhatsappLink = () => {
+    const num = profileData.whatsappNumber.replace(/[^0-9]/g, '');
+    if (num) {
+      return `https://wa.me/${num}?text=Hola%20soy%20${encodeURIComponent(profileData.displayName)}`;
+    }
+    return "#";
+  };
+  
+  const getInstagramLink = () => {
+    if (profileData.instagramUrl && !profileData.instagramUrl.startsWith('http')) {
+        return `https://${profileData.instagramUrl}`;
+    }
+    return profileData.instagramUrl || "#";
+  };
+  // --- Fin de Funciones de utilidad ---
 
   // Detección de cambios
   const hasChanges = Object.keys(profileData).some(key => 
@@ -93,7 +106,6 @@ export default function Profile() {
           photoURL: data.photoURL || baseData.photoURL, 
           coverURL: data.coverURL || DEFAULT_COVER,
           theme: data.theme || baseData.theme,
-          // Aseguramos que 'public' sea un booleano
           public: data.public === false ? false : true, 
           instagramUrl: data.instagramUrl || baseData.instagramUrl,
           whatsappNumber: data.whatsappNumber || baseData.whatsappNumber,
@@ -104,6 +116,10 @@ export default function Profile() {
         setProfileData(baseData);
         setOriginalProfileData(baseData);
       }
+    }, (error) => {
+        // 🚨 Captura de error de permiso para el perfil principal
+        console.error("Error al escuchar el perfil (Necesita reglas de seguridad):", error);
+        // Podemos seguir usando el estado local si falla
     });
 
     return () => unsubProfile();
@@ -116,7 +132,12 @@ export default function Profile() {
       collection(db, "profiles", user.uid, "gallery"),
       orderBy("createdAt", "desc")
     );
-    const unsubGallery = onSnapshot(q, (snap) => setGallery(snap.docs.map((d) => ({ id: d.id, ...d.data() }))));
+    const unsubGallery = onSnapshot(q, (snap) => setGallery(snap.docs.map((d) => ({ id: d.id, ...d.data() }))), (error) => {
+        // 🚨 Captura de error de permiso para la galería
+        console.error("Error al escuchar la galería (Necesita reglas de seguridad):", error);
+    });
+    
+    // Asumiendo que contadores también dan error, los mantenemos simples
     const unsubFollowers = onSnapshot(collection(db, "followers", user.uid, "list"), (snap) => setFollowers(snap.size));
     const unsubFollowing = onSnapshot(collection(db, "following", user.uid, "list"), (snap) => setFollowing(snap.size));
     
@@ -125,30 +146,16 @@ export default function Profile() {
 
   
   // --- SUBIDA SIMULADA DE ARCHIVOS (Manejo local para vista inmediata) ---
-  
-  // Muestra la imagen seleccionada localmente y actualiza el estado
-  async function handleImageChange(file, field) {
+  function handleImageChange(file, field) {
     if (!file) return;
     const localUrl = URL.createObjectURL(file);
-    
-    // 1. Actualiza el estado local para la vista inmediata
     setProfileData(prev => ({ ...prev, [field]: localUrl }));
-
-    // 2. Simula el guardado de una URL genérica en Firestore para mantener consistencia
-    try {
-        await setDoc(doc(db, "profiles", user.uid), { 
-            [field]: field === 'photoURL' ? FORCED_AVATAR : DEFAULT_COVER, 
-            updatedAt: serverTimestamp() 
-        }, { merge: true });
-        // No se lanza alerta para que la experiencia de usuario sea fluida.
-    } catch (e) {
-        console.error("Error al simular guardado de imagen:", e);
-    }
+    // No se simula el guardado en Firestore para evitar más errores de permisos.
+    // La imagen se verá, pero solo hasta que recargue la página.
   }
 
-  // --- FUNCIÓNES FUNCIONALES DE FIRESTORE ---
+  // --- FUNCIÓNES FUNCIONALES DE FIRESTORE (Añadir Semilla) ---
 
-  // Añade un tipo de semilla aleatorio a la colección (Funcional con Firestore)
   async function handleAddSeed() {
     if (!user) return alert("Debes iniciar sesión para añadir semillas.");
     const randomSeed = SEED_TYPES[Math.floor(Math.random() * SEED_TYPES.length)];
@@ -160,23 +167,22 @@ export default function Profile() {
         url: SEED_IMAGE,
         createdAt: serverTimestamp(),
       });
-      console.log(`Semilla añadida: ${randomSeed.name}`);
-      // La UI se actualiza automáticamente gracias a onSnapshot
+      alert(`🌱 ${randomSeed.name} añadida con éxito (si las reglas lo permiten).`);
     } catch (e) {
       console.error("Error al añadir semilla:", e);
-      alert("❌ Falló al añadir semilla. Revise la consola y las reglas de Firestore.");
+      alert("❌ Falló al añadir semilla. ¡REVISE SUS REGLAS DE SEGURIDAD!");
     }
   }
 
-  // Elimina una semilla de la colección (Funcional con Firestore)
+  // Elimina una semilla (Funcional con Firestore)
   async function removeGalleryItem(item) {
     if (!window.confirm(`¿Seguro que quieres eliminar la semilla ${item.type}?`)) return;
     try {
       await deleteDoc(doc(db, "profiles", user.uid, "gallery", item.id));
-      console.log("Semilla eliminada.");
+      // La UI se actualiza automáticamente
     } catch (e) {
       console.error("Error al eliminar semilla:", e);
-      alert("❌ Falló al eliminar semilla. Revise la consola y las reglas de Firestore.");
+      alert("❌ Falló al eliminar semilla. ¡REVISE SUS REGLAS DE SEGURIDAD!");
     }
   }
 
@@ -193,7 +199,7 @@ export default function Profile() {
                 displayName: profileData.displayName,
                 bio: profileData.bio,
                 theme: profileData.theme,
-                public: profileData.public, // Aquí se guarda el estado público/privado
+                public: profileData.public,
                 instagramUrl: profileData.instagramUrl,
                 whatsappNumber: profileData.whatsappNumber,
                 updatedAt: serverTimestamp(),
@@ -202,10 +208,10 @@ export default function Profile() {
         );
         
         setOriginalProfileData(profileData); 
-        alert("✅ Perfil de jardinero guardado con éxito.");
+        alert("✅ Perfil guardado con éxito.");
     } catch (e) {
         console.error("Error al guardar perfil:", e);
-        alert("❌ Error al guardar el perfil. Revise la consola y las reglas de Firestore.");
+        alert("❌ Error al guardar el perfil. ¡REVISE SUS REGLAS DE SEGURIDAD!");
     }
   }
 
@@ -215,9 +221,8 @@ export default function Profile() {
   };
 
 
-  // --- Renderizado Condicional y Estilos Temáticos ---
-
-  if (loading) return <div className="p-6 text-center text-xl min-h-screen flex items-center justify-center bg-gray-50">Regando el perfil... 🌱</div>;
+  // --- Renderizado y Estilos ---
+  if (loading) return <div className="p-6 text-center text-xl min-h-screen flex items-center justify-center bg-gray-50">Cargando...</div>;
   if (!user) return null; 
 
   const isDark = profileData.theme === "dark";
@@ -226,7 +231,7 @@ export default function Profile() {
   const inputClass = isDark ? "p-3 border rounded border-gray-700 bg-gray-700 text-white" : "p-3 border rounded";
   const primaryButtonClass = "bg-green-600 hover:bg-green-700 text-white transition duration-150";
   
-  // --- Emojis como Reemplazo de Iconos ---
+  // Emojis
   const IconoCandado = profileData.public ? "🔓" : "🔒";
   const IconoGuardar = "💾";
   const IconoSemilla = "🌱";
@@ -238,7 +243,7 @@ export default function Profile() {
     <div className={`min-h-screen pb-12 ${themeClass}`}>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
         
-        {/* COVER (Funcional para seleccionar archivo local) */}
+        {/* COVER */}
         <div className="relative">
           <div style={{ backgroundImage: `url(${profileData.coverURL})` }}
             className="h-56 bg-cover bg-center rounded-b-2xl shadow-md" />
@@ -256,7 +261,7 @@ export default function Profile() {
         <div className="max-w-5xl mx-auto -mt-16 px-4 sm:px-6 lg:px-8">
           <div className={`${cardClass} rounded-2xl p-6 flex flex-col md:flex-row gap-6 mb-8`}>
             
-            {/* AVATAR (Imagen Fija Garantizada) + BIO */}
+            {/* AVATAR + BIO */}
             <div className="w-full md:w-48 flex-shrink-0 text-center">
               <div className="relative inline-block">
                 <img 
@@ -301,7 +306,7 @@ export default function Profile() {
                   </div>
                 </div>
 
-                {/* Controles de Guardado y Privacidad (Funcionales) */}
+                {/* Controles de Guardado y Privacidad */}
                 <div className="flex gap-3">
                   <button onClick={() => handleChange('public', !profileData.public)} 
                           className={`px-3 py-1 rounded flex items-center gap-1 transition duration-150 ${profileData.public ? "border border-green-600 text-green-700 bg-green-100 dark:bg-green-900/50 dark:text-green-300" : "border border-red-600 text-red-700 bg-red-100 dark:bg-red-900/50 dark:text-red-300"}`}>
@@ -339,7 +344,7 @@ export default function Profile() {
                 <span className="text-sm px-3 py-1 bg-green-100 rounded text-green-700">Nivel de Crecimiento: 1</span>
               </div>
 
-              {/* Editable fields */}
+              {/* editable fields */}
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input 
                   value={profileData.displayName} 
@@ -380,7 +385,7 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* COLECCIÓN DE SEMILLAS (Funcional) */}
+          {/* COLECCIÓN DE SEMILLAS */}
           <div className={`${cardClass} rounded-2xl p-6`}>
             <div className="flex justify-between items-center mb-4 border-b pb-3 border-gray-100 dark:border-gray-700">
               <h3 className="text-2xl font-bold">Mi Colección de Semillas ({gallery.length})</h3>
@@ -407,7 +412,7 @@ export default function Profile() {
                         <div className="text-xs text-slate-500">Agregada: {(item.createdAt?.toDate() || new Date()).toLocaleDateString()}</div>
                     </div>
                     
-                    {/* Botón de eliminar superpuesto (Funcional) */}
+                    {/* Botón de eliminar superpuesto */}
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
                       <button onClick={() => removeGalleryItem(item)} 
                               className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-full text-sm flex items-center gap-1 transition transform hover:scale-110">
@@ -420,7 +425,7 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* LOGROS DE CRECIMIENTO */}
+          {/* Logros y Preferencias */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
             
             <div className={`${cardClass} p-4`}>
