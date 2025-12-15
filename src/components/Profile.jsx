@@ -1,4 +1,3 @@
-// src/components/Profile.jsx (Versión FINAL con Diseño Corregido y Funcionalidad OK)
 
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../firebase.js"; 
@@ -16,7 +15,6 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-// --- URLs de Marcador de Posición ---
 const FORCED_AVATAR = "https://images.unsplash.com/photo-1594784917637-2911b338e948?q=80&w=300&auto=format&fit=crop"; 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1546252917-a169b50e334a?q=80&w=1600&auto=format&fit=crop";   
 const SEED_IMAGE = "https://images.unsplash.com/photo-1502095906208-16e6d1c4481f?q=80&w=300&auto=format&fit=crop"; 
@@ -51,7 +49,6 @@ export default function Profile() {
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
 
-  // --- Funciones de utilidad ---
   const getWhatsappLink = () => {
     const num = profileData.whatsappNumber.replace(/[^0-9]/g, '');
     if (num) {
@@ -66,14 +63,11 @@ export default function Profile() {
     }
     return profileData.instagramUrl || "#";
   };
-  // --- Fin de Funciones de utilidad ---
-
-  // Detección de cambios
+  
   const hasChanges = Object.keys(profileData).some(key => 
     profileData[key] !== originalProfileData[key]
   );
 
-  // 1. Manejo de Autenticación y Redirección
   useEffect(() => {
     const unsubAuth = auth.onAuthStateChanged((u) => {
       setUser(u);
@@ -85,7 +79,6 @@ export default function Profile() {
     return () => unsubAuth();
   }, [nav]);
 
-  // 2. Carga Inicial del Perfil desde Firestore
   useEffect(() => {
     if (!user || loading) return; 
     
@@ -123,7 +116,6 @@ export default function Profile() {
     return () => unsubProfile();
   }, [user, loading]); 
 
-  // 3. Carga de Colección de Semillas y Contadores
   useEffect(() => {
     if (!user) return;
     const q = query(
@@ -141,14 +133,12 @@ export default function Profile() {
   }, [user]);
 
   
-  // --- SUBIDA SIMULADA DE ARCHIVOS (Solo muestra la imagen local) ---
   function handleImageChange(file, field) {
     if (!file) return;
     const localUrl = URL.createObjectURL(file);
     setProfileData(prev => ({ ...prev, [field]: localUrl }));
   }
 
-  // --- FUNCIÓNES FUNCIONALES DE FIRESTORE ---
 
   async function handleAddSeed() {
     if (!user) return alert("Debes iniciar sesión para añadir semillas.");
@@ -210,7 +200,6 @@ export default function Profile() {
   };
 
 
-  // --- Renderizado y Estilos ---
   if (loading) return <div className="p-6 text-center text-xl min-h-screen flex items-center justify-center bg-gray-50">Cargando...</div>;
   if (!user) return null; 
 
@@ -220,7 +209,6 @@ export default function Profile() {
   const inputClass = isDark ? "p-3 border rounded border-gray-700 bg-gray-700 text-white" : "p-3 border rounded";
   const primaryButtonClass = "bg-green-600 hover:bg-green-700 text-white transition duration-150";
   
-  // Emojis
   const IconoCandado = profileData.public ? "🔓" : "🔒";
   const IconoGuardar = "💾";
   const IconoSemilla = "🌱";
@@ -232,7 +220,6 @@ export default function Profile() {
     <div className={`min-h-screen pb-12 ${themeClass}`}>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
         
-        {/* COVER (Altura aumentada a h-64) */}
         <div className="relative">
           <div style={{ backgroundImage: `url(${profileData.coverURL})` }}
             className="h-64 bg-cover bg-center rounded-b-2xl shadow-md" />
@@ -247,11 +234,9 @@ export default function Profile() {
           </label>
         </div>
 
-        {/* CONTENIDO PRINCIPAL - MARGEN A -mt-28 */}
-        <div className="max-w-5xl mx-auto -mt-28 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto mt-28 px-4 sm:px-6 lg:px-8">
           <div className={`${cardClass} rounded-2xl p-8 flex flex-col md:flex-row gap-8 mb-8`}>
             
-            {/* AVATAR + BIO */}
             <div className="w-full md:w-48 flex-shrink-0 text-center">
               <div className="relative inline-block">
                 <img 
@@ -276,12 +261,9 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* INFO PRINCIPAL + ESTADÍSTICAS */}
-            {/* AGREGADO pt-8 PARA SEPARAR EL CONTENIDO DE LA IMAGEN DE ARRIBA */}
             <div className="flex-1 pt-8 md:pt-0"> 
               <div className="flex flex-col md:flex-row justify-between items-start mb-6">
                 
-                {/* Estadísticas */}
                 <div className="flex gap-6 mb-4 md:mb-0">
                   <div className="text-center">
                     <div className="font-bold text-xl">{gallery.length}</div>
@@ -297,7 +279,6 @@ export default function Profile() {
                   </div>
                 </div>
 
-                {/* Controles de Guardado y Privacidad */}
                 <div className="flex gap-3">
                   <button onClick={() => handleChange('public', !profileData.public)} 
                           className={`px-3 py-1 rounded flex items-center gap-1 transition duration-150 ${profileData.public ? "border border-green-600 text-green-700 bg-green-100 dark:bg-green-900/50 dark:text-green-300" : "border border-red-600 text-red-700 bg-red-100 dark:bg-red-900/50 dark:text-red-300"}`}>
@@ -314,7 +295,6 @@ export default function Profile() {
                 </div>
               </div>
 
-              {/* Links Sociales Dinámicos */}
               <div className="mt-4 flex flex-wrap gap-3 items-center border-t pt-4 border-gray-100 dark:border-gray-700">
                 
                 {profileData.whatsappNumber && (
@@ -335,7 +315,6 @@ export default function Profile() {
                 <span className="text-sm px-3 py-1 bg-green-100 rounded text-green-700">Nivel de Crecimiento: 1</span>
               </div>
 
-              {/* editable fields */}
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input 
                   value={profileData.displayName} 
@@ -376,7 +355,6 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* COLECCIÓN DE SEMILLAS */}
           <div className={`${cardClass} rounded-2xl p-6`}>
             <div className="flex justify-between items-center mb-4 border-b pb-3 border-gray-100 dark:border-gray-700">
               <h3 className="text-2xl font-bold">Mi Colección de Semillas ({gallery.length})</h3>
@@ -403,7 +381,6 @@ export default function Profile() {
                         <div className="text-xs text-slate-500">Agregada: {(item.createdAt?.toDate() || new Date()).toLocaleDateString()}</div>
                     </div>
                     
-                    {/* Botón de eliminar superpuesto */}
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
                       <button onClick={() => removeGalleryItem(item)} 
                               className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-full text-sm flex items-center gap-1 transition transform hover:scale-110">
@@ -416,7 +393,6 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* Logros y Preferencias */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
             
             <div className={`${cardClass} p-4`}>
