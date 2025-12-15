@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { motion } from "framer-motion"; 
 
 // --- Nuevos datos de productos para la Tienda Premium ---
-const premiumProducts = [
+// Nota: La propiedad 'link' se mantiene en el objeto por si desea usarla más tarde, pero el botón ahora usa handleBuy.
+const premiumProductsData = [
   {
     id: 1,
     name: "Kit de Sustrato VIP",
@@ -54,6 +55,9 @@ export default function PrivateZone() {
   const [fertilizerDose, setFertilizerDose] = useState("");
   const [timerRunning, setTimerRunning] = useState(false);
   const [time, setTime] = useState(0); 
+  
+  // NUEVO ESTADO PARA SIMULACIÓN DE COMPRA
+  const [purchasedProducts, setPurchasedProducts] = useState({}); // { 1: true, 2: false }
 
   const [quizStep, setQuizStep] = useState(0);
   const [quizAnswers, setQuizAnswers] = useState([]);
@@ -61,6 +65,16 @@ export default function PrivateZone() {
 
   /* ================= FUNCIONES ================= */
 
+  // Función de Simulación de Compra
+  const handleBuy = (productId) => {
+    // Simula añadir al carrito / compra exitosa
+    setPurchasedProducts(prev => ({ ...prev, [productId]: true }));
+    // Opcional: Mostrar un alert simulado
+    setTimeout(() => {
+        alert("¡Compra exitosa! Revisa tu carrito o email. (Simulación)");
+    }, 200);
+  };
+  
   // Función de temporizador (simulación)
   const startTimer = () => {
     if (!timerRunning) {
@@ -386,7 +400,7 @@ export default function PrivateZone() {
             )}
           </div>
 
-          {/* OFERTAS PREMIUM MEJORADAS (NUEVA ESTRUCTURA) */}
+          {/* OFERTAS PREMIUM SIMULACIÓN DE COMPRA */}
           <div className={`${cardClass} md:col-span-2 lg:col-span-3`}>
             <h3 className="font-bold text-green-700 mb-4 text-3xl flex items-center gap-3">
               🛍️ Tienda Premium Exclusiva
@@ -394,7 +408,7 @@ export default function PrivateZone() {
             <p className="text-gray-600 mb-4">Acceso a los mejores productos con descuento solo para miembros VIP.</p>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {premiumProducts.map(product => (
+                {premiumProductsData.map(product => (
                     <motion.div 
                         key={product.id} 
                         className="border border-green-300 p-4 rounded-xl bg-green-50 hover:shadow-xl transition duration-300"
@@ -409,14 +423,21 @@ export default function PrivateZone() {
                             <span className="text-sm text-red-600 font-semibold bg-red-100 px-2 py-0.5 rounded-full">{product.discount}</span>
                         </div>
                         
-                        <a
-                            href={product.link}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="block text-center bg-yellow-500 text-white font-semibold py-2 rounded-lg hover:bg-yellow-600 transition"
-                        >
-                            Ver Producto y Comprar
-                        </a>
+                        {purchasedProducts[product.id] ? (
+                            <button
+                                disabled
+                                className="block w-full text-center bg-gray-400 text-white font-semibold py-2 rounded-lg cursor-not-allowed"
+                            >
+                                ✅ ¡Añadido al Carrito!
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => handleBuy(product.id)}
+                                className="block w-full text-center bg-yellow-500 text-white font-semibold py-2 rounded-lg hover:bg-yellow-600 transition"
+                            >
+                                🛒 Comprar Ahora
+                            </button>
+                        )}
                     </motion.div>
                 ))}
             </div>
