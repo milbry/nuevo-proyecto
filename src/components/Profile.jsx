@@ -1,4 +1,4 @@
-// src/components/Profile.jsx (Versión Final y Diseño Ajustado)
+// src/components/Profile.jsx (Versión Final y Diseño Ajustado V3)
 
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../firebase.js"; 
@@ -232,10 +232,10 @@ export default function Profile() {
     <div className={`min-h-screen pb-12 ${themeClass}`}>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
         
-        {/* COVER */}
+        {/* COVER (Altura aumentada a h-64) */}
         <div className="relative">
           <div style={{ backgroundImage: `url(${profileData.coverURL})` }}
-            className="h-56 bg-cover bg-center rounded-b-2xl shadow-md" />
+            className="h-64 bg-cover bg-center rounded-b-2xl shadow-md" />
           <label className={`absolute right-6 top-4 ${cardClass.split(' ')[0]} ${cardClass.split(' ')[2]} text-sm px-3 py-1 rounded-full cursor-pointer flex items-center gap-2 hover:bg-opacity-90 transition`}>
             {IconoSubir} Cambiar Portada
             <input 
@@ -247,8 +247,8 @@ export default function Profile() {
           </label>
         </div>
 
-        {/* CONTENIDO PRINCIPAL - AUMENTADO MARGEN -mt-24 */}
-        <div className="max-w-5xl mx-auto -mt-24 px-4 sm:px-6 lg:px-8">
+        {/* CONTENIDO PRINCIPAL - MARGEN AUMENTADO A -mt-32 */}
+        <div className="max-w-5xl mx-auto -mt-32 px-4 sm:px-6 lg:px-8">
           <div className={`${cardClass} rounded-2xl p-8 flex flex-col md:flex-row gap-8 mb-8`}>
             
             {/* AVATAR + BIO */}
