@@ -7,7 +7,6 @@ import Card from './Card.jsx';
 export default function Grid(){
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('All');
-  // Usar PRODUCTS en lugar de PLANTS
   const cats = ['All', ...Array.from(new Set(PRODUCTS.map(p => p.category)))]; 
   const filtered = PRODUCTS.filter(p => (cat === 'All' || p.category === cat) && (q === '' || p.name.toLowerCase().includes(q.toLowerCase()))); 
   return (

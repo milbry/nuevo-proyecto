@@ -1,5 +1,5 @@
 
-export const PLANTS = [
+export const PRODUCTS = [
   {
     id: '1',
     name: 'Monstera Deliciosa',
