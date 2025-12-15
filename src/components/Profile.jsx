@@ -1,37 +1,40 @@
-// src/components/Profile.jsx
+// src/components/Profile.jsx (Versión sin Firebase Storage)
+
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { auth, db, storage } from "../firebase.js"; // ajusta la ruta si la tienes en otro lugar
+// ¡IMPORTANTE! Eliminamos 'storage' de la importación
+import { auth, db } from "../firebase.js"; 
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   doc,
-  getDoc,
   setDoc,
   collection,
   query,
-  where,
   orderBy,
   onSnapshot,
   addDoc,
   deleteDoc,
-  serverTimestamp, // Uso de serverTimestamp para mayor precisión
+  serverTimestamp,
 } from "firebase/firestore";
-import {
-  ref as storageRef,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-} from "firebase/storage";
-import { FiUploadCloud, FiTrash2, FiSave, FiEdit3, FiLock, FiUnlock, FiRefreshCw } from "react-icons/fi"; // Iconos para mejor UX
+// Eliminamos todas las importaciones de Firebase Storage (ref, uploadBytesResumable, getDownloadURL, deleteObject)
 
-// Estado inicial para la información del perfil (para comparación)
+import { FiUploadCloud, FiTrash2, FiSave, FiEdit3, FiLock, FiUnlock, FiInstagram, FiWhatsapp, FiRefreshCw } from "react-icons/fi"; 
+
+// --- URLs de Marcador de Posición ---
+const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+const DEFAULT_COVER = "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1600&q=60";
+// URL de imagen fija para simular la galería
+const FIXED_GALLERY_IMAGE = "https://images.unsplash.com/photo-1501854140801-50d01698b53e?auto=format&fit=crop&w=600&q=60";
+
 const initialProfileState = {
   displayName: "",
   bio: "",
-  photoURL: "",
-  coverURL: "",
+  photoURL: DEFAULT_AVATAR, // Usar marcador de posición
+  coverURL: DEFAULT_COVER,   // Usar marcador de posición
   theme: "light",
   public: true,
+  instagramUrl: "", 
+  whatsappNumber: "",
 };
 
 export default function Profile() {
@@ -39,15 +42,14 @@ export default function Profile() {
   const [user, setUser] = useState(auth.currentUser);
   const [loading, setLoading] = useState(true);
   
-  // profile data (Estado para los campos editables y originales)
   const [profileData, setProfileData] = useState(initialProfileState);
   const [originalProfileData, setOriginalProfileData] = useState(initialProfileState);
   
-  // Estados de carga de archivos (para UX)
+  // Mantener los estados de carga de archivos, pero siempre serán "false"
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
-
+  
   // gallery & stats
   const [gallery, setGallery] = useState([]);
   const [followers, setFollowers] = useState(0);
@@ -57,15 +59,12 @@ export default function Profile() {
   const coverInputRef = useRef();
   const galleryInputRef = useRef();
 
-  // Determinar si hay cambios para habilitar el botón de guardar
-  const hasChanges = 
-    profileData.displayName !== originalProfileData.displayName ||
-    profileData.bio !== originalProfileData.bio ||
-    profileData.theme !== originalProfileData.theme ||
-    profileData.public !== originalProfileData.public;
+  // Detección de cambios
+  const hasChanges = Object.keys(profileData).some(key => 
+    profileData[key] !== originalProfileData[key]
+  );
 
-
-  // 1. Manejo de Autenticación
+  // 1. Manejo de Autenticación (Sin cambios)
   useEffect(() => {
     const unsubAuth = auth.onAuthStateChanged((u) => {
       setUser(u);
@@ -75,190 +74,108 @@ export default function Profile() {
     return () => unsubAuth();
   }, [nav]);
 
-  // 2. Carga Inicial del Perfil (profiles/{uid})
+  // 2. Carga Inicial del Perfil (Se mantiene la URL del marcador de posición si no hay una guardada)
   useEffect(() => {
     if (!user) return;
     const refDoc = doc(db, "profiles", user.uid);
     
-    // Usamos onSnapshot para mantener el perfil en tiempo real si alguien más lo cambia (o si el usuario lo hace en otra pestaña)
     const unsubProfile = onSnapshot(refDoc, (d) => {
+      const baseData = {
+        ...initialProfileState,
+        displayName: user.displayName || "",
+      };
+
       if (d.exists()) {
         const data = d.data();
         const loadedData = {
-          displayName: data.displayName || user.displayName || "",
-          bio: data.bio || "",
-          photoURL: data.photoURL || user.photoURL || "",
-          coverURL: data.coverURL || "",
-          theme: data.theme || "light",
-          public: data.public ?? true,
+          displayName: data.displayName || baseData.displayName,
+          bio: data.bio || baseData.bio,
+          // Mantiene la URL fija si no hay datos guardados
+          photoURL: data.photoURL || DEFAULT_AVATAR, 
+          coverURL: data.coverURL || DEFAULT_COVER,
+          theme: data.theme || baseData.theme,
+          public: data.public ?? baseData.public,
+          instagramUrl: data.instagramUrl || baseData.instagramUrl,
+          whatsappNumber: data.whatsappNumber || baseData.whatsappNumber,
         };
         setProfileData(loadedData);
-        setOriginalProfileData(loadedData); // Establecer el estado original
+        setOriginalProfileData(loadedData);
       } else {
-        // Si el documento no existe, inicializar con datos base del usuario autenticado
-        const baseData = {
-          ...initialProfileState,
-          displayName: user.displayName || "",
-          photoURL: user.photoURL || "",
-        };
         setProfileData(baseData);
         setOriginalProfileData(baseData);
-        // Opcional: Crear el documento base inmediatamente
-        setDoc(refDoc, baseData, { merge: true }).catch(console.error);
       }
     });
 
     return () => unsubProfile();
   }, [user]);
 
-  // 3. Carga de Galería (profiles/{uid}/gallery)
+  // 3. Carga de Galería (SIMULADA)
+  // La galería ahora solo listará documentos de Firestore que contengan una URL fija o URL guardada,
+  // pero la subida de la imagen física ya no existe.
   useEffect(() => {
     if (!user) return;
     const q = query(
       collection(db, "profiles", user.uid, "gallery"),
       orderBy("createdAt", "desc")
     );
-    const unsub = onSnapshot(q, (snap) => {
-      const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      setGallery(arr);
-    });
-    return () => unsub();
+    const unsubGallery = onSnapshot(q, (snap) => setGallery(snap.docs.map((d) => ({ id: d.id, ...d.data() }))));
+    const unsubFollowers = onSnapshot(collection(db, "followers", user.uid, "list"), (snap) => setFollowers(snap.size));
+    const unsubFollowing = onSnapshot(collection(db, "following", user.uid, "list"), (snap) => setFollowing(snap.size));
+    
+    return () => { unsubGallery(); unsubFollowers(); unsubFollowing(); };
   }, [user]);
 
-  // 4. Carga de Seguidores/Siguiendo
-  useEffect(() => {
-    if (!user) return;
-    const unsubF = onSnapshot(collection(db, "followers", user.uid, "list"), (snap) =>
-      setFollowers(snap.size)
-    );
-    const unsubG = onSnapshot(collection(db, "following", user.uid, "list"), (snap) =>
-      setFollowing(snap.size)
-    );
-    return () => {
-      unsubF();
-      unsubG();
-    };
-  }, [user]);
   
-  // Función de utilidad para subir archivos (usando useCallback)
-  const uploadFile = useCallback(async (file, pathPrefix = "temp") => {
-    if (!file || !user) return null;
-    const path = `profiles/${user.uid}/${pathPrefix}/${Date.now()}_${file.name}`;
-    const r = storageRef(storage, path);
-    const uploadTask = uploadBytesResumable(r, file);
-
-    return new Promise((resolve, reject) => {
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          // Puedes usar esto para mostrar una barra de progreso si es necesario
-          // const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          // console.log(`Upload is ${progress}% done`);
-        },
-        (error) => {
-          console.error("Upload error:", error);
-          reject(error);
-        },
-        async () => {
-          const url = await getDownloadURL(uploadTask.snapshot.ref);
-          resolve({ url, path: uploadTask.snapshot.ref.fullPath });
-        }
-      );
-    });
-  }, [user]);
-
-  // Manejadores de cambios de archivos
+  // --- FUNCIÓNES DE ARCHIVOS REEMPLAZADAS POR SIMULACIÓN ---
+  
+  // Función de Simulación: Simplemente guardará la URL fija en Firestore
   async function handleAvatarChange(file) {
-    if (!file) return;
-    setIsUploadingAvatar(true);
-    try {
-      const res = await uploadFile(file, "avatar");
-      if (!res) return;
-      
-      // Actualizar Firestore
-      await setDoc(doc(db, "profiles", user.uid), { photoURL: res.url }, { merge: true });
-      
-      // Actualizar estado local (se actualizará también por el snapshot del perfil, pero lo hacemos para feedback inmediato)
-      setProfileData(prev => ({ ...prev, photoURL: res.url }));
-
-      // Eliminar foto anterior si existe y no es la predeterminada (MEJORA: falta implementar el guardado del path anterior para eliminarlo)
-      
-      alert("Avatar subido con éxito.");
-    } catch (e) {
-      console.error(e);
-      alert("Error al subir avatar.");
-    } finally {
-      setIsUploadingAvatar(false);
-    }
+    alert("¡AVISO! La subida de archivos está desactivada. Solo puedes usar URLs fijas.");
+    // Si quieres simular un cambio, podrías usar una URL diferente aquí.
+    const tempUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop"; 
+    await setDoc(doc(db, "profiles", user.uid), { photoURL: tempUrl }, { merge: true });
   }
 
   async function handleCoverChange(file) {
-    if (!file) return;
-    setIsUploadingCover(true);
-    try {
-      const res = await uploadFile(file, "cover");
-      if (!res) return;
-      
-      // Actualizar Firestore
-      await setDoc(doc(db, "profiles", user.uid), { coverURL: res.url }, { merge: true });
-      
-      // Actualizar estado local
-      setProfileData(prev => ({ ...prev, coverURL: res.url }));
-      
-      alert("Portada subida con éxito.");
-    } catch (e) {
-      console.error(e);
-      alert("Error al subir portada.");
-    } finally {
-      setIsUploadingCover(false);
-    }
+    alert("¡AVISO! La subida de archivos está desactivada. Solo puedes usar URLs fijas.");
+    const tempUrl = "https://images.unsplash.com/photo-1557683315-328639014f3b?q=80&w=1600&auto=format&fit=crop"; 
+    await setDoc(doc(db, "profiles", user.uid), { coverURL: tempUrl }, { merge: true });
   }
 
+  // Función para agregar un item de Galería con URL fija
   async function handleGalleryUpload(file) {
-    if (!file) return;
     setIsUploadingGallery(true);
     try {
-      const res = await uploadFile(file, "gallery");
-      if (!res) return;
-      
-      // Añadir documento a la subcolección de galería
+      // 1. Simular la subida: Creamos un documento con una URL fija
       await addDoc(collection(db, "profiles", user.uid, "gallery"), {
-        url: res.url,
-        path: res.path, // Almacenar el path para su posterior eliminación en Storage
+        url: FIXED_GALLERY_IMAGE, // Siempre guarda la misma URL
+        path: null, // Ya no guardamos path
         createdAt: serverTimestamp(),
       });
-      alert("Imagen de galería subida.");
-      // La galería se actualizará automáticamente a través del onSnapshot
+      alert("Elemento de galería añadido (URL fija).");
     } catch (e) {
       console.error(e);
-      alert("Error al subir imagen.");
+      alert(`Error al añadir elemento: ${e.message}`);
     } finally {
       setIsUploadingGallery(false);
     }
   }
 
+  // Se mantiene, pero solo borra el documento de Firestore
   async function removeGalleryItem(item) {
     if (!window.confirm("¿Estás seguro de que quieres eliminar esta imagen?")) return;
     try {
-      // 1. Eliminar el documento de Firestore
+      // Solo eliminamos el documento de Firestore.
       await deleteDoc(doc(db, "profiles", user.uid, "gallery", item.id));
-      
-      // 2. Intentar eliminar el objeto de Storage (best-effort)
-      if (item.path) {
-          try { 
-              await deleteObject(storageRef(storage, item.path)); 
-          } catch(e){
-              console.warn("No se pudo eliminar el archivo de Storage, pero el documento de Firestore ha sido eliminado.", e);
-          }
-      }
-      alert("Imagen eliminada.");
+      alert("Elemento de galería eliminado (solo Firestore).");
     } catch (e) {
       console.error(e);
-      alert("Error al eliminar la imagen.");
+      alert("Error al eliminar el elemento.");
     }
   }
 
-  // Guardar datos del perfil
+
+  // Guardar datos del perfil (Se mantiene sin cambios)
   async function saveProfile() {
     if (!hasChanges) {
         alert("No hay cambios que guardar.");
@@ -272,12 +189,14 @@ export default function Profile() {
                 bio: profileData.bio,
                 theme: profileData.theme,
                 public: profileData.public,
+                instagramUrl: profileData.instagramUrl,
+                whatsappNumber: profileData.whatsappNumber,
+                // No actualizamos photoURL/coverURL aquí a menos que quieras permitir la edición de la URL
                 updatedAt: serverTimestamp(),
             },
             { merge: true }
         );
         
-        // Actualizar el estado original para reflejar los datos guardados
         setOriginalProfileData(profileData);
         alert("✅ Perfil guardado con éxito.");
     } catch (e) {
@@ -286,14 +205,30 @@ export default function Profile() {
     }
   }
 
-  // Helper para manejar cambios en los campos de entrada
   const handleChange = (field, value) => {
     setProfileData(prev => ({ ...prev, [field]: value }));
   };
 
+  // Funciones de Link Social (Se mantienen sin cambios)
+  const getWhatsappLink = () => {
+    const num = profileData.whatsappNumber.replace(/[^0-9]/g, '');
+    if (num) {
+      return `https://wa.me/${num}?text=Hola%20soy%20${encodeURIComponent(profileData.displayName)}`;
+    }
+    return "#";
+  };
+  
+  const getInstagramLink = () => {
+    if (profileData.instagramUrl && !profileData.instagramUrl.startsWith('http')) {
+        return `https://${profileData.instagramUrl}`;
+    }
+    return profileData.instagramUrl || "#";
+  };
+
+  // --- RENDERIZADO ---
 
   if (loading) return <div className="p-6 text-center text-xl">Cargando perfil...</div>;
-  if (!user) return null; // Redirección ya manejada en useEffect
+  if (!user) return null;
 
   const isDark = profileData.theme === "dark";
   const isJungle = profileData.theme === "jungle";
@@ -308,13 +243,14 @@ export default function Profile() {
         
         {/* COVER */}
         <div className="relative">
-          <div style={{ backgroundImage: `url(${profileData.coverURL || "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1600&q=60"})` }}
+          <div style={{ backgroundImage: `url(${profileData.coverURL})` }}
             className="h-56 bg-cover bg-center rounded-b-2xl shadow-md" />
+          {/* Alerta de que la subida no está activa */}
           <label className={`absolute right-6 top-4 ${cardClass.split(' ')[0]} ${cardClass.split(' ')[2]} text-sm px-3 py-1 rounded-full cursor-pointer flex items-center gap-2 hover:bg-opacity-90 transition`}>
-            {isUploadingCover ? "Subiendo..." : <><FiEdit3 className="w-4 h-4" /> Cambiar portada</>}
+            <span className="text-red-500">❌ Desactivado</span>
             <input ref={coverInputRef} type="file" className="hidden" 
                    accept="image/*"
-                   disabled={isUploadingCover}
+                   disabled={true} // Deshabilitado permanentemente
                    onChange={e => handleCoverChange(e.target.files?.[0])} />
           </label>
         </div>
@@ -326,15 +262,15 @@ export default function Profile() {
             <div className="w-full md:w-48 flex-shrink-0 text-center">
               <div className="relative inline-block">
                 <img 
-                  src={profileData.photoURL || "https://cdn-icons-png.flaticon.com/512/847/847969.png"} 
+                  src={profileData.photoURL} 
                   alt="avatar" 
                   className={`w-40 h-40 rounded-full border-4 ${isDark ? "border-gray-900" : "border-white"} shadow-lg object-cover mx-auto`} 
                 />
                 <label className={`absolute right-0 bottom-0 ${primaryButtonClass} text-white text-xs px-2 py-1 rounded-full cursor-pointer flex items-center gap-1`}>
-                  {isUploadingAvatar ? <FiRefreshCw className="w-3 h-3 animate-spin" /> : <FiUploadCloud className="w-3 h-3" />}
+                  <span className="text-red-500">❌</span>
                   <input ref={fileInputRef} type="file" className="hidden" 
                          accept="image/*"
-                         disabled={isUploadingAvatar}
+                         disabled={true} // Deshabilitado permanentemente
                          onChange={e => handleAvatarChange(e.target.files?.[0])} />
                 </label>
               </div>
@@ -368,7 +304,7 @@ export default function Profile() {
                 {/* Controles de Guardado y Privacidad */}
                 <div className="flex gap-3">
                   <button onClick={() => handleChange('public', !profileData.public)} 
-                          className={`px-3 py-1 rounded flex items-center gap-1 transition duration-150 ${profileData.public ? "border-green-600 text-green-700 bg-green-100" : "border-red-600 text-red-700 bg-red-100"}`}>
+                          className={`px-3 py-1 rounded flex items-center gap-1 transition duration-150 ${profileData.public ? "border border-green-600 text-green-700 bg-green-100 dark:bg-green-900/50 dark:text-green-300" : "border border-red-600 text-red-700 bg-red-100 dark:bg-red-900/50 dark:text-red-300"}`}>
                     {profileData.public ? <FiUnlock className="w-4 h-4" /> : <FiLock className="w-4 h-4" />}
                     {profileData.public ? "Público" : "Privado"}
                   </button>
@@ -382,12 +318,24 @@ export default function Profile() {
                 </div>
               </div>
 
-              {/* Social links + badges */}
+              {/* Links Sociales Dinámicos */}
               <div className="mt-4 flex flex-wrap gap-3 items-center border-t pt-4 border-gray-100 dark:border-gray-700">
-                <a className="text-sm px-3 py-1 border rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition" 
-                   href={`https://wa.me/?text=Hola%20soy%20${encodeURIComponent(profileData.displayName)}`} target="_blank" rel="noreferrer">WhatsApp</a>
-                <a className="text-sm px-3 py-1 border rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition" 
-                   href="#" target="_blank" rel="noreferrer">Instagram</a>
+                
+                {profileData.whatsappNumber && (
+                    <a className="text-sm px-3 py-1 border rounded flex items-center gap-1 text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-gray-700 transition" 
+                       href={getWhatsappLink()} target="_blank" rel="noreferrer">
+                        <FiWhatsapp className="w-4 h-4" /> WhatsApp
+                    </a>
+                )}
+                
+                {profileData.instagramUrl && (
+                    <a className="text-sm px-3 py-1 border rounded flex items-center gap-1 text-pink-600 border-pink-600 hover:bg-pink-50 dark:hover:bg-gray-700 transition" 
+                       href={getInstagramLink()} target="_blank" rel="noreferrer">
+                        <FiInstagram className="w-4 h-4" /> Instagram
+                    </a>
+                )}
+                
+                {/* Badges fijos */}
                 <span className="text-sm px-3 py-1 bg-amber-100 rounded text-amber-700">Badge: Nuevo</span>
                 <span className="text-sm px-3 py-1 bg-green-100 rounded text-green-700">Nivel: 1</span>
               </div>
@@ -409,6 +357,21 @@ export default function Profile() {
                   <option value="dark">Tema: Oscuro</option>
                   <option value="jungle">Tema: Selva</option>
                 </select>
+                
+                {/* CAMPOS SOCIALES PARA EDICIÓN */}
+                <input 
+                  value={profileData.whatsappNumber} 
+                  onChange={e => handleChange('whatsappNumber', e.target.value)} 
+                  className={inputClass} 
+                  placeholder="Número de WhatsApp (ej: 51999888777)" 
+                />
+                <input 
+                  value={profileData.instagramUrl} 
+                  onChange={e => handleChange('instagramUrl', e.target.value)} 
+                  className={inputClass} 
+                  placeholder="Link de Instagram (ej: instagram.com/mi_perfil)" 
+                />
+                
                 <textarea 
                   value={profileData.bio} 
                   onChange={e => handleChange('bio', e.target.value)} 
@@ -423,20 +386,15 @@ export default function Profile() {
           <div className={`${cardClass} rounded-2xl p-6`}>
             <div className="flex justify-between items-center mb-4 border-b pb-3 border-gray-100 dark:border-gray-700">
               <h3 className="text-2xl font-bold">Galería ({gallery.length})</h3>
-              <label className={`${primaryButtonClass} px-4 py-2 rounded-full cursor-pointer flex items-center gap-2 disabled:opacity-50`}>
-                {isUploadingGallery ? <FiRefreshCw className="w-4 h-4 animate-spin" /> : <FiUploadCloud className="w-4 h-4" />}
-                {isUploadingGallery ? "Subiendo..." : "Subir foto"}
-                <input ref={galleryInputRef} type="file" className="hidden" 
-                       accept="image/*"
-                       disabled={isUploadingGallery}
-                       onChange={e => handleGalleryUpload(e.target.files?.[0])} />
-              </label>
+              <button onClick={handleGalleryUpload} className={`${primaryButtonClass} px-4 py-2 rounded-full cursor-pointer flex items-center gap-2`}>
+                <FiUploadCloud className="w-4 h-4" /> Añadir Foto Fija
+              </button>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {gallery.length === 0 ? (
                 <div className="text-slate-500 dark:text-slate-400 col-span-full py-8 text-center">
-                  Aún no hay fotos en tu galería. Súbelas para mostrar tu progreso.
+                  Aún no hay fotos en tu galería. Añade un elemento fijo para simular.
                 </div>
               ) : (
                 gallery.map(item => (
@@ -448,7 +406,7 @@ export default function Profile() {
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
                       <button onClick={() => removeGalleryItem(item)} 
                               className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-full text-sm flex items-center gap-1 transition transform hover:scale-110">
-                        <FiTrash2 className="w-4 h-4" /> Eliminar
+                        <FiTrash2 className="w-4 h-4" /> Eliminar (Firestore)
                       </button>
                     </div>
                   </motion.div>
@@ -457,14 +415,13 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* ACTIVIDAD & LOGROS */}
+          {/* ACTIVIDAD & LOGROS (manteniendo estructura) */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            
             {/* Actividad */}
             <div className={`${cardClass} p-4`}>
               <h4 className="font-bold text-lg mb-3">Actividad reciente</h4>
               <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2">
-                <li className="flex items-center gap-2"><span className="text-green-500">●</span> Has subido {gallery.length} fotos.</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">●</span> Has guardado el perfil.</li>
                 <li className="flex items-center gap-2"><span className="text-green-500">●</span> Recibiste 12 likes en tu último post.</li>
                 <li className="flex items-center gap-2"><span className="text-green-500">●</span> Completaste 2 retos.</li>
               </ul>
@@ -475,17 +432,11 @@ export default function Profile() {
               <h4 className="font-bold text-lg mb-3">Logros</h4>
               <div className="mt-3 flex flex-col gap-2">
                 <div className="p-2 border rounded flex items-center justify-between dark:border-gray-700">
-                  <div>
-                    <div className="font-semibold">Iniciado</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">Bienvenido a GreenMag</div>
-                  </div>
+                  <div><div className="font-semibold">Iniciado</div><div className="text-xs text-slate-500 dark:text-slate-400">Bienvenido a GreenMag</div></div>
                   <div className="text-lg text-green-700">✔</div>
                 </div>
                 <div className="p-2 border rounded flex items-center justify-between dark:border-gray-700">
-                  <div>
-                    <div className="font-semibold">Primera foto</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">Subiste tu primera imagen</div>
-                  </div>
+                  <div><div className="font-semibold">Primera foto</div><div className="text-xs text-slate-500 dark:text-slate-400">Subiste tu primera imagen</div></div>
                   <div className="text-lg text-green-700">🏆</div>
                 </div>
               </div>
@@ -497,7 +448,7 @@ export default function Profile() {
               <div className="mt-3 text-sm text-slate-600 dark:text-slate-400 space-y-2">
                 <div>Perfil público: <span className="font-semibold">{profileData.public ? "Sí" : "No"}</span></div>
                 <div>Tema activo: <span className="font-semibold">{profileData.theme.charAt(0).toUpperCase() + profileData.theme.slice(1)}</span></div>
-                <div>Último guardado: <span className="font-semibold">Justo ahora</span></div>
+                <div>Número WA: <span className="font-semibold">{profileData.whatsappNumber || "No especificado"}</span></div>
               </div>
             </div>
           </div>
