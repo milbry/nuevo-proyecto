@@ -1,7 +1,7 @@
-// src/components/Profile.jsx (Versión sin Firebase Storage)
+// src/components/Profile.jsx
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
-// ¡IMPORTANTE! Eliminamos 'storage' de la importación
+// Solo importamos auth y db, ya que Storage está deshabilitado
 import { auth, db } from "../firebase.js"; 
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -16,10 +16,8 @@ import {
   deleteDoc,
   serverTimestamp,
 } from "firebase/firestore";
-// Eliminamos todas las importaciones de Firebase Storage (ref, uploadBytesResumable, getDownloadURL, deleteObject)
 
-// --- Importación de React Icons (Corregida) ---
-// Tuvimos que importar cada icono por separado para evitar el error 'FiWhatsapp'
+// Importaciones Individuales de Iconos (soluciona el error de Vite/SyntaxError)
 import { FiUploadCloud } from "react-icons/fi";
 import { FiTrash2 } from "react-icons/fi";
 import { FiSave } from "react-icons/fi";
@@ -28,37 +26,37 @@ import { FiLock } from "react-icons/fi";
 import { FiUnlock } from "react-icons/fi";
 import { FiInstagram } from "react-icons/fi";
 import { FiWhatsapp } from "react-icons/fi";
-import { FiRefreshCw } from "react-icons/fi";
-// ---------------------------------------------
+import { FiRefreshCw } from "react-icons/fi"; 
+
 // --- URLs de Marcador de Posición ---
 const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1600&q=60";
-// URL de imagen fija para simular la galería
 const FIXED_GALLERY_IMAGE = "https://images.unsplash.com/photo-1501854140801-50d01698b53e?auto=format&fit=crop&w=600&q=60";
 
 const initialProfileState = {
   displayName: "",
   bio: "",
-  photoURL: DEFAULT_AVATAR, // Usar marcador de posición
-  coverURL: DEFAULT_COVER,   // Usar marcador de posición
+  photoURL: DEFAULT_AVATAR,
+  coverURL: DEFAULT_COVER,
   theme: "light",
   public: true,
-  instagramUrl: "", 
+  instagramUrl: "",
   whatsappNumber: "",
 };
 
 export default function Profile() {
   const nav = useNavigate();
+  // Inicializamos user con el usuario actual o null
   const [user, setUser] = useState(auth.currentUser);
   const [loading, setLoading] = useState(true);
   
   const [profileData, setProfileData] = useState(initialProfileState);
   const [originalProfileData, setOriginalProfileData] = useState(initialProfileState);
   
-  // Mantener los estados de carga de archivos, pero siempre serán "false"
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const [isUploadingCover, setIsUploadingCover] = useState(false);
-  const [isUploadingGallery, setIsUploadingGallery] = useState(false);
+  // Estados de carga de archivos (Deshabilitados para no usar Storage)
+  const [isUploadingAvatar] = useState(false);
+  const [isUploadingCover] = useState(false);
+  const [isUploadingGallery] = useState(false);
   
   // gallery & stats
   const [gallery, setGallery] = useState([]);
@@ -74,25 +72,30 @@ export default function Profile() {
     profileData[key] !== originalProfileData[key]
   );
 
-  // 1. Manejo de Autenticación (Sin cambios)
+  // 1. Manejo de Autenticación y Redirección
   useEffect(() => {
     const unsubAuth = auth.onAuthStateChanged((u) => {
       setUser(u);
-      if (!u) nav("/auth");
-      setLoading(false);
+      // Solo establecemos loading a false si ya tenemos el estado de auth
+      setLoading(false); 
+      if (!u) {
+        nav("/auth");
+      }
     });
     return () => unsubAuth();
   }, [nav]);
 
-  // 2. Carga Inicial del Perfil (Se mantiene la URL del marcador de posición si no hay una guardada)
+  // 2. Carga Inicial del Perfil desde Firestore
   useEffect(() => {
-    if (!user) return;
+    // Si el usuario no existe o loading sigue siendo true, salimos
+    if (!user || loading) return; 
+    
     const refDoc = doc(db, "profiles", user.uid);
     
     const unsubProfile = onSnapshot(refDoc, (d) => {
       const baseData = {
         ...initialProfileState,
-        displayName: user.displayName || "",
+        displayName: user.displayName || "Usuario Nuevo",
       };
 
       if (d.exists()) {
@@ -100,7 +103,6 @@ export default function Profile() {
         const loadedData = {
           displayName: data.displayName || baseData.displayName,
           bio: data.bio || baseData.bio,
-          // Mantiene la URL fija si no hay datos guardados
           photoURL: data.photoURL || DEFAULT_AVATAR, 
           coverURL: data.coverURL || DEFAULT_COVER,
           theme: data.theme || baseData.theme,
@@ -111,17 +113,17 @@ export default function Profile() {
         setProfileData(loadedData);
         setOriginalProfileData(loadedData);
       } else {
+        // Si no existe el documento, inicializamos con datos base
         setProfileData(baseData);
         setOriginalProfileData(baseData);
+        // Opcional: Podrías crear el documento base aquí si quieres forzar su existencia.
       }
     });
 
     return () => unsubProfile();
-  }, [user]);
+  }, [user, loading]); // Depende de user y loading
 
-  // 3. Carga de Galería (SIMULADA)
-  // La galería ahora solo listará documentos de Firestore que contengan una URL fija o URL guardada,
-  // pero la subida de la imagen física ya no existe.
+  // 3. Carga de Galería y Contadores
   useEffect(() => {
     if (!user) return;
     const q = query(
@@ -136,30 +138,29 @@ export default function Profile() {
   }, [user]);
 
   
-  // --- FUNCIÓNES DE ARCHIVOS REEMPLAZADAS POR SIMULACIÓN ---
+  // --- FUNCIÓNES DE ARCHIVOS SIMULADAS (NO USAN FIREBASE STORAGE) ---
   
-  // Función de Simulación: Simplemente guardará la URL fija en Firestore
+  // Simulación: Alerta y actualiza a una URL temporal (opcional)
   async function handleAvatarChange(file) {
-    alert("¡AVISO! La subida de archivos está desactivada. Solo puedes usar URLs fijas.");
-    // Si quieres simular un cambio, podrías usar una URL diferente aquí.
+    alert("¡AVISO! La subida de archivos está desactivada (Firebase Storage no está activo).");
     const tempUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop"; 
     await setDoc(doc(db, "profiles", user.uid), { photoURL: tempUrl }, { merge: true });
   }
 
   async function handleCoverChange(file) {
-    alert("¡AVISO! La subida de archivos está desactivada. Solo puedes usar URLs fijas.");
+    alert("¡AVISO! La subida de archivos está desactivada (Firebase Storage no está activo).");
     const tempUrl = "https://images.unsplash.com/photo-1557683315-328639014f3b?q=80&w=1600&auto=format&fit=crop"; 
     await setDoc(doc(db, "profiles", user.uid), { coverURL: tempUrl }, { merge: true });
   }
 
-  // Función para agregar un item de Galería con URL fija
-  async function handleGalleryUpload(file) {
+  // Añade un item de Galería usando una URL fija y lo guarda en Firestore
+  async function handleGalleryUpload() {
+    // Usamos esta función directamente en el botón, sin esperar un archivo
     setIsUploadingGallery(true);
     try {
-      // 1. Simular la subida: Creamos un documento con una URL fija
       await addDoc(collection(db, "profiles", user.uid, "gallery"), {
-        url: FIXED_GALLERY_IMAGE, // Siempre guarda la misma URL
-        path: null, // Ya no guardamos path
+        url: FIXED_GALLERY_IMAGE, 
+        path: null, 
         createdAt: serverTimestamp(),
       });
       alert("Elemento de galería añadido (URL fija).");
@@ -167,15 +168,15 @@ export default function Profile() {
       console.error(e);
       alert(`Error al añadir elemento: ${e.message}`);
     } finally {
-      setIsUploadingGallery(false);
+      // Aunque no hay subida real, simulamos la finalización
+      setIsUploadingGallery(false); 
     }
   }
 
-  // Se mantiene, pero solo borra el documento de Firestore
+  // Solo borra el documento de Firestore
   async function removeGalleryItem(item) {
     if (!window.confirm("¿Estás seguro de que quieres eliminar esta imagen?")) return;
     try {
-      // Solo eliminamos el documento de Firestore.
       await deleteDoc(doc(db, "profiles", user.uid, "gallery", item.id));
       alert("Elemento de galería eliminado (solo Firestore).");
     } catch (e) {
@@ -185,7 +186,7 @@ export default function Profile() {
   }
 
 
-  // Guardar datos del perfil (Se mantiene sin cambios)
+  // Guardar datos del perfil
   async function saveProfile() {
     if (!hasChanges) {
         alert("No hay cambios que guardar.");
@@ -201,7 +202,6 @@ export default function Profile() {
                 public: profileData.public,
                 instagramUrl: profileData.instagramUrl,
                 whatsappNumber: profileData.whatsappNumber,
-                // No actualizamos photoURL/coverURL aquí a menos que quieras permitir la edición de la URL
                 updatedAt: serverTimestamp(),
             },
             { merge: true }
@@ -219,7 +219,6 @@ export default function Profile() {
     setProfileData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Funciones de Link Social (Se mantienen sin cambios)
   const getWhatsappLink = () => {
     const num = profileData.whatsappNumber.replace(/[^0-9]/g, '');
     if (num) {
@@ -235,11 +234,15 @@ export default function Profile() {
     return profileData.instagramUrl || "#";
   };
 
-  // --- RENDERIZADO ---
+  // --- Renderizado Condicional ---
 
-  if (loading) return <div className="p-6 text-center text-xl">Cargando perfil...</div>;
-  if (!user) return null;
+  // 1. Mostrar Cargando
+  if (loading) return <div className="p-6 text-center text-xl min-h-screen flex items-center justify-center bg-gray-50">Cargando perfil...</div>;
+  
+  // 2. Si no hay usuario (debería redirigir, pero es una protección)
+  if (!user) return null; 
 
+  // --- Clases de Tema ---
   const isDark = profileData.theme === "dark";
   const isJungle = profileData.theme === "jungle";
   const themeClass = isDark ? "bg-gray-900 text-white" : isJungle ? "bg-gradient-to-b from-green-50 to-green-100" : "bg-white";
@@ -255,12 +258,12 @@ export default function Profile() {
         <div className="relative">
           <div style={{ backgroundImage: `url(${profileData.coverURL})` }}
             className="h-56 bg-cover bg-center rounded-b-2xl shadow-md" />
-          {/* Alerta de que la subida no está activa */}
           <label className={`absolute right-6 top-4 ${cardClass.split(' ')[0]} ${cardClass.split(' ')[2]} text-sm px-3 py-1 rounded-full cursor-pointer flex items-center gap-2 hover:bg-opacity-90 transition`}>
             <span className="text-red-500">❌ Desactivado</span>
+            {/* El input se mantiene solo para simular, pero está deshabilitado */}
             <input ref={coverInputRef} type="file" className="hidden" 
                    accept="image/*"
-                   disabled={true} // Deshabilitado permanentemente
+                   disabled={true} 
                    onChange={e => handleCoverChange(e.target.files?.[0])} />
           </label>
         </div>
@@ -278,9 +281,10 @@ export default function Profile() {
                 />
                 <label className={`absolute right-0 bottom-0 ${primaryButtonClass} text-white text-xs px-2 py-1 rounded-full cursor-pointer flex items-center gap-1`}>
                   <span className="text-red-500">❌</span>
+                  {/* El input se mantiene solo para simular, pero está deshabilitado */}
                   <input ref={fileInputRef} type="file" className="hidden" 
                          accept="image/*"
-                         disabled={true} // Deshabilitado permanentemente
+                         disabled={true} 
                          onChange={e => handleAvatarChange(e.target.files?.[0])} />
                 </label>
               </div>
@@ -345,7 +349,6 @@ export default function Profile() {
                     </a>
                 )}
                 
-                {/* Badges fijos */}
                 <span className="text-sm px-3 py-1 bg-amber-100 rounded text-amber-700">Badge: Nuevo</span>
                 <span className="text-sm px-3 py-1 bg-green-100 rounded text-green-700">Nivel: 1</span>
               </div>
@@ -368,7 +371,6 @@ export default function Profile() {
                   <option value="jungle">Tema: Selva</option>
                 </select>
                 
-                {/* CAMPOS SOCIALES PARA EDICIÓN */}
                 <input 
                   value={profileData.whatsappNumber} 
                   onChange={e => handleChange('whatsappNumber', e.target.value)} 
@@ -412,6 +414,7 @@ export default function Profile() {
                               initial={{ scale: 0.9, opacity: 0 }} 
                               animate={{ scale: 1, opacity: 1 }} 
                               transition={{ duration: 0.3 }}>
+                    {/* Usamos item.url que viene de Firestore (URL Fija) */}
                     <img src={item.url} alt="Galería" className="w-full h-40 object-cover transition duration-300 group-hover:scale-105" />
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
                       <button onClick={() => removeGalleryItem(item)} 
@@ -427,6 +430,7 @@ export default function Profile() {
 
           {/* ACTIVIDAD & LOGROS (manteniendo estructura) */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+            
             {/* Actividad */}
             <div className={`${cardClass} p-4`}>
               <h4 className="font-bold text-lg mb-3">Actividad reciente</h4>
