@@ -123,7 +123,7 @@ export default function CartPage() {
                     
                     <div className="mt-4 p-3 border border-yellow-400 bg-yellow-50 rounded-lg text-sm text-center">
                         <p className="font-bold text-yellow-800 mb-1">Nota Importante de Pago:</p>
-                        <p className="text-yellow-700">El pago se coordina por WhatsApp una vez finalizado el pedido. Comunicate al numero **+51 928 345 384** para coordinar el envio.</p>
+                        <p className="text-yellow-700">El pago se coordina por WhatsApp una vez finalizado el pedido. Comunicate al numero **+51 928 345 384**.</p>
                     </div>
                 </div>
                 
