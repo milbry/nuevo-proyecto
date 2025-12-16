@@ -231,10 +231,7 @@ export default function PrivateZone() {
             />
           </div>
           
-// Asumiendo que 'cardClass' ya está definido.
-// Si no lo está, defina: const cardClass = "p-6 border border-gray-200 rounded-xl shadow-lg bg-white";
 
-/* --- MAPA Y CLIMA SIMULADO (VERSIÓN MEJORADA) --- */
 <div className={`${cardClass} lg:col-span-1 flex flex-col`}>
   <h2 className="text-xl font-bold text-green-800 mb-3 flex items-center gap-2">
     📍 Clima y Ubicación de Mi Huerto
