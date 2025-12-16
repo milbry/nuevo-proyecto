@@ -231,28 +231,51 @@ export default function PrivateZone() {
             />
           </div>
           
-          {/* MAPA Y CLIMA SIMULADO */}
-          <div className={`${cardClass} lg:col-span-1`}>
-            <h2 className="text-xl font-bold text-green-800 mb-3">
-              📍 Clima de mi Huerto
-            </h2>
-            <p className="text-sm text-gray-600 mb-3">
-                Tu ubicación: Ciudad de México.
-            </p>
-            <div className="w-full h-48 bg-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-700 text-center p-4">
-                
-                <span className="font-bold text-sm">
-                    Temperatura: 25°C. Humedad: 55%.
-                    <br/>
-                    Próximo Riego: Mañana.
-                </span>
-                <button className="text-xs bg-green-500 text-white px-3 py-1 rounded-full mt-2 hover:bg-green-600 transition">
-                    Ver Pronóstico Extendido
-                </button>
-            </div>
-          </div>
+// Asumiendo que 'cardClass' ya está definido.
+// Si no lo está, defina: const cardClass = "p-6 border border-gray-200 rounded-xl shadow-lg bg-white";
 
+/* --- MAPA Y CLIMA SIMULADO (VERSIÓN MEJORADA) --- */
+<div className={`${cardClass} lg:col-span-1 flex flex-col`}>
+  <h2 className="text-xl font-bold text-green-800 mb-3 flex items-center gap-2">
+    📍 Clima y Ubicación de Mi Huerto
+  </h2>
+  
+  <p className="text-sm text-gray-600 mb-3">
+    Tu ubicación: **Lima-Carabayllo**, Perú. <span className="font-semibold text-green-700">Zona 10b (Templado/Seco).</span>
+  </p>
+  
+  {/* Iframe de Google Maps - Simulación de Ubicación Real */}
+  <div className="flex-1 w-full rounded-lg overflow-hidden shadow-md mb-4">
+    <iframe
+      title="Ubicación simulada del huerto en Carabayllo, Lima"
+      width="100%"
+      height="100%"
+      style={{ border: 0 }}
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15617.900995167098!2d-77.03780519999999!3d-11.87413555!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105d15317769919%3A0x6731d798f4835694!2sCarabayllo!5e0!3m2!1ses!2spe!4m2!3d-11.87413555!4d-77.03780519999999!5e0"
+      allowFullScreen=""
+      loading="lazy"
+      referrerPolicy="no-referrer-when-downgrade"
+    ></iframe>
+  </div>
 
+  {/* Datos de Clima (Estáticos pero con mejor diseño) */}
+  <div className="flex justify-between items-center text-sm p-3 bg-green-100 rounded-lg shadow-inner">
+    <div className="flex flex-col items-center">
+        <span className="text-3xl">☀️</span> {/* Ícono de Clima */}
+        <span className="font-bold text-green-800">25°C</span>
+        <span className="text-xs text-gray-700">Parcialmente Nublado</span>
+    </div>
+    <div className="text-right">
+        <span className="block font-semibold">Humedad: 55%</span>
+        <span className="block font-semibold">Viento: 10 km/h</span>
+        <span className="block font-bold text-blue-700 mt-1">Próximo Riego: Mañana 8 AM</span>
+    </div>
+  </div>
+  
+  <button className="text-sm bg-green-600 text-white px-3 py-2 rounded-lg mt-4 hover:bg-green-700 transition font-medium">
+    Ver Pronóstico y Alertas de Plagas
+  </button>
+</div>
           {/* VIDEO YOUTUBE (Webinar) */}
           <div className={`${cardClass} md:col-span-2 lg:col-span-3`}>
             <h2 className="text-xl font-bold text-green-800 mb-3">
