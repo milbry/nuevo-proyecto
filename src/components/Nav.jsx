@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { auth } from "../firebase.js";
 import { motion, AnimatePresence } from "framer-motion";
-import { HiMenu, HiX } from "react-icons/hi";
+// AÑADIR EL ICONO DEL CARRITO
+import { HiMenu, HiX, HiShoppingCart, HiUserCircle } from "react-icons/hi"; 
+
 export default function Nav({ user }) {
   const nav = useNavigate();
   const location = useLocation();
@@ -10,15 +12,17 @@ export default function Nav({ user }) {
   const navRef = useRef();
   const [navHeight, setNavHeight] = useState(0);
 
-  // --- ENLACES ACTUALIZADOS: AÑADIMOS LA RUTA DE ACCESORIOS ---
+  // --- ENLACES ACTUALIZADOS: AÑADIMOS PLANTAS Y ACCESORIOS MÁS CLARO ---
   const links = [
     { name: "Inicio", to: "/" },
-    { name: "Accesorios", to: "/accessories" }, // ¡NUEVO ENLACE DE LA TIENDA!
+    // Aseguramos que la lista de productos principal tenga una ruta explícita si Home es solo la landing
+    { name: "Plantas", to: "/grid" }, 
+    { name: "Accesorios", to: "/accessories" }, 
     { name: "Encuesta", to: "/survey" },
     { name: "Contacto", to: "/contact" },
     { name: "Zona VIP", to: "/private" },
   ];
-  // -----------------------------------------------------------
+  // ----------------------------------------------------------------------
 
   // Obtener altura del navbar para "espaciador"
   useEffect(() => {
@@ -29,6 +33,12 @@ export default function Nav({ user }) {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Función de cierre de menú y navegación
+  const handleNavClick = (to) => {
+    nav(to);
+    setMenuOpen(false);
+  }
 
   return (
     <>
@@ -49,7 +59,7 @@ export default function Nav({ user }) {
             🌿 GreenMag
           </Link>
 
-          {/* Desktop Links: Se actualiza automáticamente */}
+          {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-8">
             {links.map((link) => (
               <motion.div key={link.to} whileHover={{ scale: 1.05 }}>
@@ -66,8 +76,22 @@ export default function Nav({ user }) {
           </div>
 
 
-          {/* User Buttons */}
+          {/* User and Cart Buttons */}
           <div className="hidden md:flex items-center gap-4">
+            
+            {/* --- 🛒 ENLACE AL CARRITO (NUEVO) --- */}
+            <motion.div whileHover={{ scale: 1.1 }}>
+                <Link
+                    to="/cart"
+                    className="p-2 rounded-full text-black hover:bg-white hover:text-green-700 transition"
+                    title="Ver Carrito de Compras"
+                >
+                    <HiShoppingCart size={24} />
+                    {/* Indicador de ítems, si se implementa */}
+                    {/* <span className="absolute top-0 right-0 inline-flex items-center justify-center ...">3</span> */}
+                </Link>
+            </motion.div>
+            
             {user ? (
               <>
                 <motion.button
@@ -97,15 +121,25 @@ export default function Nav({ user }) {
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          {/* Mobile menu button (and Cart/User for mobile) */}
+          <div className="md:hidden flex items-center gap-3">
+            {/* 🛒 Ícono del Carrito para móvil */}
+            <Link
+                to="/cart"
+                onClick={() => setMenuOpen(false)}
+                className="p-1 rounded-full text-black hover:text-green-700 transition"
+                title="Ver Carrito de Compras"
+            >
+                <HiShoppingCart size={28} />
+            </Link>
+            
             <button onClick={() => setMenuOpen((prev) => !prev)}>
-              {menuOpen ? <HiX size={28} className="text-black" /> : <HiMenu size={28} className="text-black" />}
+              {menuOpen ? <HiX size={30} className="text-black" /> : <HiMenu size={30} className="text-black" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu: Se actualiza automáticamente */}
+        {/* Mobile Menu */}
         <AnimatePresence>
           {menuOpen && (
             <motion.div
@@ -128,14 +162,14 @@ export default function Nav({ user }) {
                   </Link>
                 ))}
 
+                {/* Separador */}
+                <hr className="my-2 border-green-300" />
+                
                 {user ? (
                   <div className="flex flex-col gap-2 mt-3">
                     <button
-                      onClick={() => {
-                        nav("/profile");
-                        setMenuOpen(false);
-                      }}
-                      className="bg-white text-green-800 px-3 py-1 rounded-lg hover:bg-green-100 transition shadow-sm"
+                      onClick={() => handleNavClick("/profile")}
+                      className="bg-white text-green-800 px-3 py-1 rounded-lg hover:bg-green-100 transition shadow-sm"
                     >
                       Mi perfil
                     </button>
@@ -153,7 +187,7 @@ export default function Nav({ user }) {
                   <Link
                     to="/auth"
                     onClick={() => setMenuOpen(false)}
-                    className="bg-white text-green-800 px-3 py-1 rounded-lg hover:bg-green-100 transition shadow-sm mt-2"
+                    className="bg-white text-green-800 px-3 py-1 rounded-lg hover:bg-green-100 transition shadow-sm mt-2 text-center"
                   >
                     Ingresar
                   </Link>
