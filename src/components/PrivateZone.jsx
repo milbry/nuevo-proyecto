@@ -232,6 +232,7 @@ export default function PrivateZone() {
           </div>
           
 
+/* --- MAPA Y CLIMA SIMULADO (VERSIÓN FINAL SIN BOTÓN) --- */
 <div className={`${cardClass} lg:col-span-1 flex flex-col`}>
   <h2 className="text-xl font-bold text-green-800 mb-3 flex items-center gap-2">
     📍 Clima y Ubicación de Mi Huerto
@@ -255,7 +256,7 @@ export default function PrivateZone() {
     ></iframe>
   </div>
 
-  {/* Datos de Clima (Estáticos pero con mejor diseño) */}
+  {/* Datos de Clima (Estáticos y bien diseñados) */}
   <div className="flex justify-between items-center text-sm p-3 bg-green-100 rounded-lg shadow-inner">
     <div className="flex flex-col items-center">
         <span className="text-3xl">☀️</span> {/* Ícono de Clima */}
@@ -269,9 +270,7 @@ export default function PrivateZone() {
     </div>
   </div>
   
-  <button className="text-sm bg-green-600 text-white px-3 py-2 rounded-lg mt-4 hover:bg-green-700 transition font-medium">
-    Ver Pronóstico y Alertas de Plagas
-  </button>
+  {/* El botón de acción ha sido eliminado. */}
 </div>
           {/* VIDEO YOUTUBE (Webinar) */}
           <div className={`${cardClass} md:col-span-2 lg:col-span-3`}>
