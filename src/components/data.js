@@ -1,158 +1,48 @@
-// --- src/data.js ---
+// --- src/data.js (¡CATÁLOGO MÁXIMO!) ---
 
 export const PRODUCTS = [
-  {
-    id: '1',
-    name: 'Monstera Deliciosa',
-    category: 'Tropical',
-    difficulty: 'Media',
-    price: 45.99,
-    stock: 5,
-    light: 'Luz indirecta brillante',
-    water: 'Secar el primer tercio del sustrato.',
-    petFriendly: false, 
-    marketingTag: 'Icono del Diseño Interior',
-    image: 'https://images.unsplash.com/photo-1621262916172-e64903328e12?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    desc: 'La Monstera, conocida por sus hojas grandes y fenestradas (agujeros), es un ícono de la decoración moderna. Requiere alta humedad para evitar que las puntas se pongan marrones. Ideal para darle un toque selvático a cualquier espacio.',
-    tips: [
-      "Limpia sus hojas para un brillo máximo.",
-      "Usa un tutor de musgo para crecimiento vertical y aéreo.",
-      "Fertiliza en primavera y verano con un NPK balanceado."
-    ],
-    accessories: ['101', '102', '103'] 
-  },
-  {
-    id: '2',
-    name: 'Sansevieria Trifasciata',
-    category: 'Suculenta',
-    difficulty: 'Fácil',
-    price: 18.50,
-    stock: 12,
-    light: 'Tolera poca luz (Low Light Hero)',
-    water: 'Regar solo cuando el sustrato esté completamente seco (1 vez/mes).',
-    petFriendly: true, 
-    marketingTag: 'Purificadora de Aire NASA',
-    image: 'https://images.unsplash.com/photo-1601984288673-9a74c3d4a000?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    desc: 'También conocida como Lengua de Suegra. Es indestructible, perfecta para principiantes. Es famosa por su capacidad de filtrar toxinas del aire, incluso de noche.',
-    tips: [
-      "El mayor peligro es el exceso de riego.",
-      "Ideal para dormitorios u oficinas con poca luz.",
-      "Se propaga fácilmente por división de rizomas."
-    ],
-    accessories: ['103', '105']
-  },
-  {
-    id: '3',
-    name: 'Pothos (Epipremnum aureum)',
-    category: 'Colgante',
-    difficulty: 'Muy fácil',
-    price: 22.99,
-    stock: 20,
-    light: 'Luz indirecta, tolera sombra.',
-    water: 'Cuando el sustrato superior esté seco al tacto.',
-    petFriendly: false,
-    marketingTag: 'Crecimiento Rápido y Flexible',
-    image: 'https://images.unsplash.com/photo-1593452922152-4467d3e09841?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    desc: 'El Pothos es increíblemente indulgente y de rápido crecimiento. Es ideal para estanterías, ya que sus tallos caen en cascada de forma hermosa.',
-    tips: [
-      "Elige un tiesto colgante para un efecto decorativo.",
-      "Se propaga fácilmente con esquejes en agua.",
-      "Si ves hojas amarillas, espera más para el próximo riego."
-    ],
-    accessories: ['104', '102']
-  },
-  {
-    id: '4',
-    name: 'Ficus Lyrata (Violín)',
-    category: 'Árbol',
-    difficulty: 'Difícil',
-    price: 89.00,
-    stock: 3,
-    light: 'Mucha luz brillante, tolera sol directo suave.',
-    water: 'Mantener el sustrato ligeramente húmedo.',
-    petFriendly: false,
-    marketingTag: 'Planta Statement de Lujo',
-    image: 'https://images.unsplash.com/photo-1616235489873-10023cc25cc1?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    desc: 'Famoso por sus grandes hojas en forma de violín. Es una planta caprichosa que odia los cambios de ubicación y las corrientes de aire. Requiere atención, pero el resultado es espectacular.',
-    tips: [
-      "Rótala para que la luz le dé por igual.",
-      "Es sensible a las cochinillas; revisa el envés.",
-      "Necesita un ambiente estable y constante."
-    ],
-    accessories: ['101', '103']
-  },
-  {
-    id: '5',
-    name: 'Zamioculcas Zamiifolia (ZZ Plant)',
-    category: 'Suculenta',
-    difficulty: 'Muy fácil',
-    price: 32.00,
-    stock: 8,
-    light: 'Poca luz a indirecta brillante.',
-    water: 'Permitir que el sustrato se seque completamente entre riegos.',
-    petFriendly: false,
-    marketingTag: 'La Planta Indestructible',
-    image: 'https://images.unsplash.com/photo-1619852233824-388a1005a74e?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    desc: 'La planta ZZ es famosa por su resiliencia. Tolera la negligencia, la poca luz y los riegos espaciados, lo que la hace perfecta para oficinas y principiantes.',
-    tips: [
-      "El peor enemigo de la ZZ es el exceso de agua.",
-      "Sus hojas brillantes no necesitan pulverizado.",
-      "Puede pasar meses sin ser regada."
-    ],
-    accessories: ['101', '103']
-  },
+  // --- PLANTAS INICIALES (5) ---
+  { id: '1', name: 'Monstera Deliciosa', category: 'Tropical', difficulty: 'Media', price: 45.99, stock: 5, light: 'Luz indirecta brillante', water: 'Secar el primer tercio del sustrato.', petFriendly: false, marketingTag: 'Icono del Diseño Interior', image: 'https://images.unsplash.com/photo-1621262916172-e64903328e12?q=80&w=1770&auto=format&fit=crop', desc: 'La Monstera, conocida por sus hojas grandes y fenestradas (agujeros).', tips: ["Limpia sus hojas.", "Usa un tutor de musgo."], accessories: ['101', '102', '103'] },
+  { id: '2', name: 'Sansevieria Trifasciata', category: 'Suculenta', difficulty: 'Fácil', price: 18.50, stock: 12, light: 'Tolera poca luz (Low Light Hero)', water: 'Regar solo cuando el sustrato esté completamente seco.', petFriendly: true, marketingTag: 'Purificadora de Aire NASA', image: 'https://images.unsplash.com/photo-1601984288673-9a74c3d4a000?q=80&w=1770&auto=format&fit=crop', desc: 'También conocida como Lengua de Suegra. Es indestructible, perfecta para principiantes.', tips: ["El mayor peligro es el exceso de riego.", "Ideal para dormitorios."], accessories: ['103', '105'] },
+  { id: '3', name: 'Pothos (Epipremnum aureum)', category: 'Colgante', difficulty: 'Muy fácil', price: 22.99, stock: 20, light: 'Luz indirecta, tolera sombra.', water: 'Cuando el sustrato superior esté seco al tacto.', petFriendly: false, marketingTag: 'Crecimiento Rápido y Flexible', image: 'https://images.unsplash.com/photo-1593452922152-4467d3e09841?q=80&w=1770&auto=format&fit=crop', desc: 'El Pothos es increíblemente indulgente y de rápido crecimiento.', tips: ["Elige un tiesto colgante.", "Se propaga fácilmente con esquejes en agua."], accessories: ['104', '102'] },
+  { id: '4', name: 'Ficus Lyrata (Violín)', category: 'Árbol', difficulty: 'Difícil', price: 89.00, stock: 3, light: 'Mucha luz brillante.', water: 'Mantener el sustrato ligeramente húmedo.', petFriendly: false, marketingTag: 'Planta Statement de Lujo', image: 'https://images.unsplash.com/photo-1616235489873-10023cc25cc1?q=80&w=1770&auto=format&fit=crop', desc: 'Famoso por sus grandes hojas en forma de violín. Es una planta caprichosa.', tips: ["Rótala para que la luz le dé por igual.", "Es sensible a las cochinillas."], accessories: ['101', '103'] },
+  { id: '5', name: 'Zamioculcas Zamiifolia (ZZ Plant)', category: 'Suculenta', difficulty: 'Muy fácil', price: 32.00, stock: 8, light: 'Poca luz a indirecta brillante.', water: 'Permitir que el sustrato se seque completamente.', petFriendly: false, marketingTag: 'La Planta Indestructible', image: 'https://images.unsplash.com/photo-1619852233824-388a1005a74e?q=80&w=1770&auto=format&fit=crop', desc: 'La planta ZZ es famosa por su resiliencia. Tolera la negligencia.', tips: ["El peor enemigo de la ZZ es el exceso de agua.", "Puede pasar meses sin ser regada."], accessories: ['101', '103'] },
+
+  // --- PLANTAS AÑADIDAS (6-10) ---
+  { id: '6', name: 'Aloe Vera', category: 'Suculenta', difficulty: 'Fácil', price: 15.00, stock: 35, light: 'Sol directo brillante', water: 'Espaciar el riego, dejar secar completamente.', petFriendly: false, marketingTag: 'Remedio Natural de Casa', image: 'https://images.unsplash.com/photo-1594895689100-38144b679624?q=80&w=1770&auto=format&fit=crop', desc: 'Famosa por sus propiedades curativas. Requiere mucha luz.', tips: ["Ideal para quemaduras solares.", "Evitar el encharcamiento."], accessories: ['105', '109'] },
+  { id: '7', name: 'Calathea Orbifolia', category: 'Tropical', difficulty: 'Difícil', price: 55.50, stock: 4, light: 'Luz indirecta, nunca sol directo.', water: 'Mantener el sustrato uniformemente húmedo.', petFriendly: true, marketingTag: 'Hojas Artísticas XL', image: 'https://images.unsplash.com/photo-1628108992451-9e28329b3113?q=80&w=1770&auto=format&fit=crop', desc: 'Una planta visualmente impactante. Requiere alta humedad.', tips: ["Usar agua destilada para evitar el cloro.", "Necesita alta humedad ambiental."], accessories: ['106', '102'] },
+  { id: '8', name: 'Fittonia (Nerve Plant)', category: 'Bajo Mantenimiento', difficulty: 'Fácil', price: 12.00, stock: 25, light: 'Luz indirecta baja', water: 'Mantener siempre húmeda, pero no encharcada.', petFriendly: true, marketingTag: 'Toque de Color Bajo la Sombra', image: 'https://images.unsplash.com/photo-1534002690021-3e4b306a4542?q=80&w=1770&auto=format&fit=crop', desc: 'Pequeña planta que pide agua de forma dramática (se desmaya).', tips: ["Si se cae, riega y se recuperará en minutos.", "Ideal para terrarios."], accessories: ['108', '107'] },
+  { id: '9', name: 'Echeveria Perle (Roseta)', category: 'Suculenta', difficulty: 'Media', price: 10.50, stock: 40, light: 'Sol directo o mucha luz', water: 'Riego muy escaso en invierno.', petFriendly: true, marketingTag: 'Belleza Simétrica y Compacta', image: 'https://images.unsplash.com/photo-1582260654497-b352f75a9829?q=80&w=1770&auto=format&fit=crop', desc: 'Esta suculenta forma rosetas perfectas de color azul-gris.', tips: ["Tierra muy drenante es obligatoria.", "Cuidado con el sol intenso."], accessories: ['105', '109'] },
+  { id: '10', name: 'Cactus (Eriocactus Magnificus)', category: 'Cactus', difficulty: 'Muy fácil', price: 14.99, stock: 18, light: 'Máximo sol directo posible', water: 'Prácticamente nulo en invierno.', petFriendly: false, marketingTag: 'Escultura del Desierto', image: 'https://images.unsplash.com/photo-1522079024888-eb287f340578?q=80&w=1770&auto=format&fit=crop', desc: 'Un cactus globular clásico de crecimiento lento.', tips: ["Asegúrate de que la maceta tenga un orificio de drenaje grande.", "Fertilizar muy ligeramente en primavera."], accessories: ['105', '110'] },
+
+  // --- NUEVAS 5 PLANTAS (11-15) ---
+  { id: '11', name: 'Peperomia Obtusifolia', category: 'Bajo Mantenimiento', difficulty: 'Fácil', price: 20.00, stock: 15, light: 'Luz indirecta', water: 'Secar casi completamente entre riegos.', petFriendly: true, marketingTag: 'Hojas Suculentas y Brillantes', image: 'https://images.unsplash.com/photo-1627943329976-5993e5066498?q=80&w=1770&auto=format&fit=crop', desc: 'Compacta y de follaje denso. Tolera un poco la negligencia.', tips: ["No necesita mucha agua.", "Se pudre fácilmente por exceso de riego."], accessories: ['101', '111'] },
+  { id: '12', name: 'Helecho Nido de Ave', category: 'Helecho', difficulty: 'Media', price: 30.50, stock: 7, light: 'Sombra a luz indirecta', water: 'Mantener húmedo, no mojar el "nido" central.', petFriendly: true, marketingTag: 'Textura Exótica y Suave', image: 'https://images.unsplash.com/photo-1621287959083-d9d300067677?q=80&w=1770&auto=format&fit=crop', desc: 'Un helecho con hojas anchas y onduladas. Requiere humedad constante y circulación de aire.', tips: ["Ideal para baños.", "No le gusta el sol directo."], accessories: ['106', '102'] },
+  { id: '13', name: 'Bonsái Ficus', category: 'Árbol', difficulty: 'Difícil', price: 120.00, stock: 2, light: 'Luz brillante, tolera sol suave.', water: 'Riego diario en verano, moderado en invierno.', petFriendly: false, marketingTag: 'Arte en Miniatura', image: 'https://images.unsplash.com/photo-1594917411649-0115e45a2781?q=80&w=1770&auto=format&fit=crop', desc: 'Requiere poda y alambrado constante para mantener su forma. Una pieza central impresionante.', tips: ["Necesita mucha luz para prosperar.", "Revisa las raíces anualmente."], accessories: ['104', '112', '115'] },
+  { id: '14', name: 'Tradescantia Zebrina', category: 'Colgante', difficulty: 'Muy fácil', price: 16.00, stock: 30, light: 'Luz brillante para mantener el color púrpura.', water: 'Dejar secar la parte superior del sustrato.', petFriendly: false, marketingTag: 'Color Rápido y Económico', image: 'https://images.unsplash.com/photo-1620950337855-8d5947a755d7?q=80&w=1770&auto=format&fit=crop', desc: 'Famosa por sus rayas verdes, plateadas y púrpuras. Crecen rápidamente y son fáciles de propagar.', tips: ["Pellizcar las puntas para que sea más tupida.", "Propagar en agua fácilmente."], accessories: ['107', '113'] },
+  { id: '15', name: 'Dracaena Marginata', category: 'Árbol', difficulty: 'Fácil', price: 40.00, stock: 9, light: 'Luz indirecta, tolera niveles bajos.', water: 'Dejar que el sustrato se seque casi por completo.', petFriendly: false, marketingTag: 'Elegancia Vertical', image: 'https://images.unsplash.com/photo-1628108992451-2d7c7c3b2169?q=80&w=1770&auto=format&fit=crop', desc: 'Tallo delgado y hojas finas de color verde con bordes rojizos. Ideal para esquinas o espacios altos.', tips: ["No usar agua del grifo si es dura (cloro).", "No la muevas constantemente."], accessories: ['101', '103'] },
 ];
 
-// --- Productos accesorios (Cross-selling) ---
+// --- PRODUCTOS ACCESORIOS (CATÁLOGO MÁXIMO) ---
 export const ACCESSORIES = [
-    { 
-        id: '101', 
-        name: 'Maceta Cerámica Premium', 
-        price: 25.00, 
-        desc: 'Diseño nórdico y minimalista, optimiza el drenaje y la ventilación. Ideal para interiores.', 
-        category: 'Macetería', // Nueva categoría
-        stock: 50,
-        image: 'https://images.unsplash.com/photo-1615462529272-a25e90d0b741?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', 
-        tips: ["Combina con cualquier estilo de decoración.", "Material resistente y duradero.", "Disponible en varios tamaños."],
-    },
-    { 
-        id: '102', 
-        name: 'Fertilizante NPK 10-10-10', 
-        price: 9.99, 
-        desc: 'Fórmula líquida balanceada para un crecimiento general vigoroso. Apto para la mayoría de plantas de interior y exterior.', 
-        category: 'Nutrición', // Nueva categoría
-        stock: 100,
-        image: 'https://images.unsplash.com/photo-1594191370213-ed1231f2479e?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', 
-        tips: ["Diluir según las instrucciones del envase.", "Aplicar durante la temporada de crecimiento (primavera-verano).", "No fertilizar plantas recién trasplantadas o estresadas."],
-    },
-    { 
-        id: '103', 
-        name: 'Kit Medidor de Humedad 3 en 1', 
-        price: 15.00, 
-        desc: 'Herramienta esencial para medir el pH, la intensidad de luz y la humedad del sustrato. ¡Evita errores de riego!', 
-        category: 'Herramientas', // Nueva categoría
-        stock: 30,
-        image: 'https://images.unsplash.com/photo-1627932644265-f93504fb491d?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', 
-        tips: ["Insertar la sonda en el sustrato, no en el agua.", "Limpiar la sonda después de cada uso.", "No es apto para medir líquidos."],
-    },
-    { 
-        id: '104', 
-        name: 'Tijeras de Poda Esterilizadas', 
-        price: 12.00, 
-        desc: 'Tijeras afiladas de acero inoxidable, esenciales para podar y propagar tus plantas sin riesgo de enfermedades.', 
-        category: 'Herramientas', // Nueva categoría
-        stock: 40,
-        image: 'https://images.unsplash.com/photo-1616581977938-f1c5c1f0b0c6?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', 
-        tips: ["Esterilizar antes y después de cada uso.", "Realizar cortes limpios y precisos.", "Ideal para eliminar hojas muertas o enfermas."],
-    },
-    { 
-        id: '105', 
-        name: 'Sustrato Drenante Especial', 
-        price: 14.50, 
-        desc: 'Mezcla de sustrato premium con alta aireación y drenaje. Perfecto para cactus, suculentas y Sansevierias.', 
-        category: 'Sustratos', // Nueva categoría
-        stock: 60,
-        image: 'https://images.unsplash.com/photo-1629851759573-03310023a105?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', 
-        tips: ["Mejora la salud de las raíces.", "Previene el exceso de humedad.", "Renovar cada 1-2 años."],
-    },
+    // --- ACCESORIOS ORIGINALES (5) ---
+    { id: '101', name: 'Maceta Cerámica Premium', price: 25.00, desc: 'Diseño nórdico y minimalista, optimiza el drenaje.', category: 'Macetería', stock: 50, image: 'https://images.unsplash.com/photo-1615462529272-a25e90d0b741?q=80&w=1770&auto=format&fit=crop', tips: ["Combina con cualquier estilo de decoración."],},
+    { id: '102', name: 'Fertilizante NPK 10-10-10', price: 9.99, desc: 'Fórmula líquida balanceada para un crecimiento general vigoroso.', category: 'Nutrición', stock: 100, image: 'https://images.unsplash.com/photo-1594191370213-ed1231f2479e?q=80&w=1770&auto=format&fit=crop', tips: ["Diluir según las instrucciones del envase."],},
+    { id: '103', name: 'Kit Medidor de Humedad 3 en 1', price: 15.00, desc: 'Herramienta esencial para medir el pH, la intensidad de luz y la humedad del sustrato.', category: 'Herramientas', stock: 30, image: 'https://images.unsplash.com/photo-1627932644265-f93504fb491d?q=80&w=1770&auto=format&fit=crop', tips: ["Evita errores de riego.", "Limpiar la sonda después de cada uso."],},
+    { id: '104', name: 'Tijeras de Poda Esterilizadas', price: 12.00, desc: 'Tijeras afiladas de acero inoxidable, esenciales para podar y propagar tus plantas.', category: 'Herramientas', stock: 40, image: 'https://images.unsplash.com/photo-1616581977938-f1c5c1f0b0c6?q=80&w=1770&auto=format&fit=crop', tips: ["Esterilizar antes y después de cada uso."],},
+    { id: '105', name: 'Sustrato Drenante Especial', price: 14.50, desc: 'Mezcla de sustrato premium con alta aireación y drenaje. Perfecto para suculentas.', category: 'Sustratos', stock: 60, image: 'https://images.unsplash.com/photo-1629851759573-03310023a105?q=80&w=1770&auto=format&fit=crop', tips: ["Mejora la salud de las raíces.", "Renovar cada 1-2 años."],},
+
+    // --- ACCESORIOS AÑADIDOS (6-10) ---
+    { id: '106', name: 'Humidificador Ultrasónico', price: 39.99, desc: 'Eleva la humedad ambiental, vital para plantas tropicales.', category: 'Climatización', stock: 15, image: 'https://images.unsplash.com/photo-1601007823521-4d40212e3532?q=80&w=1770&auto=format&fit=crop', tips: ["Usar agua destilada para evitar depósitos blancos."],},
+    { id: '107', name: 'Guantes de Jardinería (Ligeros)', price: 8.50, desc: 'Guantes transpirables con agarre, protegen las manos sin perder tacto.', category: 'Herramientas', stock: 75, image: 'https://images.unsplash.com/photo-1542838186-0428d085df75?q=80&w=1770&auto=format&fit=crop', tips: ["Ideales para trasplantes rápidos.", "Lavables a máquina."],},
+    { id: '108', name: 'Pulverizador de Presión (0.5L)', price: 19.00, desc: 'Ideal para aplicar fungicidas, insecticidas o simplemente rociar agua.', category: 'Herramientas', stock: 22, image: 'https://images.unsplash.com/photo-1577977465365-1d4411132205?q=80&w=1770&auto=format&fit=crop', tips: ["No usar el mismo pulverizador para agua y químicos.", "Asegura una niebla fina."],},
+    { id: '109', name: 'Abono para Suculentas (Lento)', price: 11.50, desc: 'Fórmula de liberación lenta baja en nitrógeno, perfecta para Suculentas y Cactus.', category: 'Nutrición', stock: 55, image: 'https://images.unsplash.com/photo-1599824050212-04e4c330f55b?q=80&w=1770&auto=format&fit=crop', tips: ["Aplicar solo una vez al año al inicio de la primavera."],},
+    { id: '110', name: 'Piedras Decorativas Blancas', price: 7.99, desc: '500g de piedras pulidas para cubrir el sustrato, añadiendo un toque estético.', category: 'Macetería', stock: 80, image: 'https://images.unsplash.com/photo-1559902646-9b6d8590c684?q=80&w=1770&auto=format&fit=crop', tips: ["Usar sobre la capa superior del sustrato.", "Previene la evaporación rápida del agua."],},
+
+    // --- NUEVOS 5 ACCESORIOS (11-15) ---
+    { id: '111', name: 'Tutor de Musgo (Grande)', price: 18.00, desc: 'Soporte vertical esencial para plantas trepadoras como Monsteras o Philodendrons.', category: 'Soporte', stock: 30, image: 'https://images.unsplash.com/photo-1627943329976-5993e5066498?q=80&w=1770&auto=format&fit=crop', tips: ["Mantener el musgo húmedo para fomentar el agarre de las raíces aéreas."],},
+    { id: '112', name: 'Kit de Herramientas para Bonsái', price: 45.00, desc: 'Incluye podadoras cóncavas, alambres y pinzas para el cuidado avanzado de bonsáis.', category: 'Herramientas', stock: 10, image: 'https://images.unsplash.com/photo-1621287959083-d9d300067677?q=80&w=1770&auto=format&fit=crop', tips: ["Herramientas de precisión para trabajo delicado.", "Limpiar y aceitar regularmente."],},
+    { id: '113', name: 'Sistema de Riego por Goteo (Vacaciones)', price: 29.99, desc: 'Ideal para mantener las plantas hidratadas automáticamente durante ausencias prolongadas.', category: 'Riego', stock: 25, image: 'https://images.unsplash.com/photo-1542838186-0428d085df75?q=80&w=1770&auto=format&fit=crop', tips: ["Ajustar la velocidad de goteo según la planta y clima."],},
+    { id: '114', name: 'Lámpara de Cultivo LED (Espectro Completo)', price: 65.00, desc: 'Proporciona la luz necesaria a plantas en espacios interiores con poca luz natural.', category: 'Climatización', stock: 8, image: 'https://images.unsplash.com/photo-1601007823521-4d40212e3532?q=80&w=1770&auto=format&fit=crop', tips: ["Mantener la distancia correcta entre la lámpara y el follaje."],},
+    { id: '115', name: 'Insecticida Orgánico (Neem)', price: 15.50, desc: 'Aceite de Neem, solución natural y efectiva para combatir plagas comunes como cochinillas y arañas rojas.', category: 'Plagas', stock: 45, image: 'https://images.unsplash.com/photo-1594191370213-ed1231f2479e?q=80&w=1770&auto=format&fit=crop', tips: ["Aplicar por la noche para evitar quemaduras solares.", "Agitar bien antes de usar."],},
 ];
