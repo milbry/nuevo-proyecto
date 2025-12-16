@@ -232,7 +232,6 @@ export default function PrivateZone() {
           </div>
           
 
-/* --- MAPA Y CLIMA SIMULADO (VERSIÓN FINAL SIN BOTÓN) --- */
 <div className={`${cardClass} lg:col-span-1 flex flex-col`}>
   <h2 className="text-xl font-bold text-green-800 mb-3 flex items-center gap-2">
     📍 Clima y Ubicación de Mi Huerto
