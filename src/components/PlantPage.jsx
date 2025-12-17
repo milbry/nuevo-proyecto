@@ -179,9 +179,9 @@ export default function PlantPage(){
                 
                 <h4 className="font-bold text-xl text-green-700">Tips Esenciales:</h4>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                    <li>💧 **Riego:** {plant.care.watering}</li>
-                    <li>💡 **Luz:** {plant.care.light}</li>
-                    <li>🌡️ **Temperatura:** {plant.care.temperature}</li>
+                    <li>💧 **Riego:** {plant.watering}</li>
+                    <li>💡 **Luz:** {plant.light}</li>
+                    <li>🌡️ **Temperatura:** {plant.temperature}</li>
                 </ul>
             </div>
         </div>
