@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ACCESSORIES } from './data.js';
 import { useCart } from './CartContext.jsx'; 
-// Importamos el hook de autenticación
-import { useAuthStateLocal } from "./hooks.js"; // 👈 ¡NUEVO!
+import { useAuthStateLocal } from "./hooks.js"; 
 
 // Importar iconos para los botones de cantidad
 import { HiShoppingCart, HiMinusCircle, HiPlusCircle } from 'react-icons/hi'; 
@@ -14,15 +13,14 @@ export default function AccessoryPage(){
   const { id } = useParams();
   const nav = useNavigate();
   const accessory = ACCESSORIES.find(a => a.id === id);
-    
-  // OBTENER EL ESTADO DEL USUARIO
-  const { user } = useAuthStateLocal(); // 👈 ¡NUEVO!
+    
+  // OBTENER EL ESTADO DEL USUARIO para el guardián de compra
+  const { user } = useAuthStateLocal(); 
 
   const { addToCart, cartItems } = useCart(); 
 
   if (!accessory) {
-    // ... (Manejo de accesorio no encontrado sin cambios) ...
-    return (
+    return (
       <div className="max-w-4xl mx-auto p-6 text-center text-red-600 font-bold">
         Accesorio no encontrado.
         <button onClick={() => nav('/accessories')} className="block mx-auto mt-4 px-4 py-2 bg-green-600 text-white rounded">
@@ -37,31 +35,31 @@ export default function AccessoryPage(){
 
   // Lógica de Stock
   const isOutOfStock = accessory.stock === 0;
-  const isAddedToCart = cartItems.some(item => item.id === accessory.id); 
+  const isAddedToCart = cartItems.some(item => item.id === accessory.id); 
 
-  // ... handleQuantityChange (sin cambios)
-  const handleQuantityChange = (newQuantity) => {
-    let value = Math.max(1, parseInt(newQuantity) || 1); 
-    value = Math.min(accessory.stock, value); 
-    setQuantity(value);
-  };
+  // Asegura que la cantidad siempre esté entre 1 y el stock disponible
+  const handleQuantityChange = (newQuantity) => {
+    let value = Math.max(1, parseInt(newQuantity) || 1); 
+    value = Math.min(accessory.stock, value); 
+    setQuantity(value);
+  };
   
-  // 🚨 MODIFICACIÓN: FUNCIÓN DE AÑADIR AL CARRITO REAL
+  // FUNCIÓN DE AÑADIR AL CARRITO CON GUARDIÁN DE AUTENTICACIÓN
   const handleAddToCart = () => {
-    // 1. VERIFICACIÓN DE AUTENTICACIÓN
-    if (!user) {
-      alert("⚠️ Debes iniciar sesión para añadir productos al carrito.");
-      nav('/auth'); // Redirige al login
-      return;
-    }
+    // 1. VERIFICACIÓN DE AUTENTICACIÓN
+    if (!user) {
+      alert("⚠️ Debes iniciar sesión para añadir productos al carrito.");
+      nav('/auth'); 
+      return;
+    }
 
-    // 2. Si está logueado, procede con la compra
-    addToCart(accessory, quantity); 
+    // 2. Si está logueado, procede con la compra
+    addToCart(accessory, quantity); 
     alert(`🎉 ¡${quantity} unidad(es) de ${accessory.name} añadida(s) al carrito! Total actual: $${(accessory.price * quantity).toFixed(2)}.`);
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-white shadow-xl rounded-xl mt-8">
+    <div className="max-w-6xl mx-auto p-6 bg-white shadow-xl rounded-xl mt-8">
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
@@ -76,8 +74,7 @@ export default function AccessoryPage(){
 
         {/* Columna 2: Info de Compra y Detalles */}
         <aside className="p-4 bg-green-50 rounded-lg shadow-inner flex flex-col justify-between">
-            {/* ... (Contenido sin cambios) ... */}
-            <div>
+            <div>
                 <h1 className="text-4xl font-extrabold text-green-900 mb-2">{accessory.name}</h1>
                 <p className="text-xl font-semibold text-gray-700 mb-4">{accessory.category}</p>
                 
@@ -94,11 +91,44 @@ export default function AccessoryPage(){
                 
                 <p className="mt-2 text-slate-700 text-lg border-b pb-4 mb-4">{accessory.desc}</p>
             </div>
-            
-            {/* ... (Selección de cantidad sin cambios) ... */}
-            <div className="flex items-center gap-4 mb-6 p-3 bg-white rounded-lg border">
-                {/* ... botones y input de cantidad ... */}
+            
+            {/* SELECCIÓN DE CANTIDAD (COMPLETO) */}
+            <div className="flex items-center gap-4 mb-6 p-3 bg-white rounded-lg border">
+                <label htmlFor="quantity" className="font-semibold text-gray-700 flex-shrink-0">
+                    Elegir Cantidad:
+                </label>
+                
+                {/* Botón para restar cantidad */}
+                <button 
+                    onClick={() => handleQuantityChange(quantity - 1)}
+                    disabled={quantity <= 1 || isOutOfStock || isAddedToCart}
+                    className={`p-1 rounded-full transition ${quantity <= 1 || isOutOfStock || isAddedToCart ? 'text-gray-400 cursor-not-allowed' : 'text-green-600 hover:bg-green-100'}`}
+                >
+                    <HiMinusCircle size={30} />
+                </button>
+                
+                {/* Input de cantidad */}
+                <input
+                    type="number"
+                    id="quantity"
+                    value={quantity}
+                    onChange={(e) => handleQuantityChange(e.target.value)}
+                    min="1"
+                    max={accessory.stock}
+                    className="w-16 text-center border-none focus:ring-2 focus:ring-green-500 rounded-lg p-2 font-bold text-xl"
+                    disabled={isOutOfStock || isAddedToCart}
+                />
+                
+                {/* Botón para sumar cantidad */}
+                <button 
+                    onClick={() => handleQuantityChange(quantity + 1)}
+                    disabled={quantity >= accessory.stock || isOutOfStock || isAddedToCart}
+                    className={`p-1 rounded-full transition ${quantity >= accessory.stock || isOutOfStock || isAddedToCart ? 'text-gray-400 cursor-not-allowed' : 'text-green-600 hover:bg-green-100'}`}
+                >
+                    <HiPlusCircle size={30} />
+                </button>
             </div>
+
 
             {/* Botón de Compra */}
             {isAddedToCart || isOutOfStock ? (
@@ -110,7 +140,7 @@ export default function AccessoryPage(){
                 </button>
             ) : (
                 <button
-                    onClick={handleAddToCart} // Usa la función modificada
+                    onClick={handleAddToCart}
                     className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 rounded-xl transition duration-300 text-xl flex items-center justify-center gap-2"
                 >
                     <HiShoppingCart size={24} /> Añadir ({quantity}) al Carrito

@@ -6,7 +6,7 @@ import { PRODUCTS, ACCESSORIES } from '../components/data.js';
 import CommentsFull from './ComentsFull.jsx';
 import { useCart } from './CartContext.jsx'; 
 // Importamos el hook de autenticación
-import { useAuthStateLocal } from "./hooks.js"; // 👈 ¡NUEVO!
+import { useAuthStateLocal } from "./hooks.js"; // 👈 Implementación de Autenticación
 
 // Importar iconos para los botones de cantidad
 import { HiShoppingCart, HiMinusCircle, HiPlusCircle } from 'react-icons/hi'; 
@@ -16,53 +16,53 @@ export default function PlantPage(){
   const nav = useNavigate();
   const plant = PRODUCTS.find(p => p.id === id) || PRODUCTS[0];
   
-  // OBTENER EL ESTADO DEL USUARIO
-  const { user } = useAuthStateLocal(); // 👈 ¡NUEVO!
-  
+  // OBTENER EL ESTADO DEL USUARIO
+  const { user } = useAuthStateLocal(); // 👈 Hook para el guardián de autenticación
+  
   const { addToCart, cartItems } = useCart(); 
   const [quantity, setQuantity] = useState(1); 
   
-  // ... Lógica de Stock (sin cambios)
+  // Lógica de Stock
   const isOutOfStock = plant.stock === 0;
-  const isPlantInCart = cartItems.some(item => item.id === plant.id);
-  const isAccessoryInCart = (accessoryId) => cartItems.some(item => item.id === accessoryId);
+  const isPlantInCart = cartItems.some(item => item.id === plant.id);
+  const isAccessoryInCart = (accessoryId) => cartItems.some(item => item.id === accessoryId);
   
-  // ... handleQuantityChange (sin cambios)
-  const handleQuantityChange = (newQuantity) => {
-    let value = Math.max(1, parseInt(newQuantity) || 1); 
-    value = Math.min(plant.stock, value); 
-    setQuantity(value);
-  };
+  // Lógica de Cantidad
+  const handleQuantityChange = (newQuantity) => {
+    let value = Math.max(1, parseInt(newQuantity) || 1); 
+    value = Math.min(plant.stock, value); 
+    setQuantity(value);
+  };
   
-  // 🚨 MODIFICACIÓN: FUNCIÓN DE COMPRA PLANTA
+  // 🚨 FUNCIÓN DE COMPRA PLANTA CON GUARDIÁN
   const handleBuyPlant = () => {
-    // 1. VERIFICACIÓN DE AUTENTICACIÓN
-    if (!user) {
-      alert("⚠️ Debes iniciar sesión para añadir productos al carrito.");
-      nav('/auth'); // Redirige al login
-      return;
-    }
-    
-    // 2. Si está logueado, procede con la compra
-    addToCart(plant, quantity); 
-    alert(`🎉 ¡${quantity} unidad(es) de ${plant.name} añadida(s) al carrito!`);
+    // 1. VERIFICACIÓN DE AUTENTICACIÓN
+    if (!user) {
+      alert("⚠️ Debes iniciar sesión para añadir productos al carrito.");
+      nav('/auth'); // Redirige al login
+      return;
+    }
+    
+    // 2. Si está logueado, procede con la compra
+    addToCart(plant, quantity); 
+    alert(`🎉 ¡${quantity} unidad(es) de ${plant.name} añadida(s) al carrito!`);
   };
 
-  // 🚨 MODIFICACIÓN: FUNCIÓN DE COMPRA ACCESORIO
+  // 🚨 FUNCIÓN DE COMPRA ACCESORIO CON GUARDIÁN
   const handleBuyAccessory = (accessory) => {
-    // 1. VERIFICACIÓN DE AUTENTICACIÓN
-    if (!user) {
-      alert("⚠️ Debes iniciar sesión para añadir accesorios al carrito.");
-      nav('/auth'); // Redirige al login
-      return;
-    }
+    // 1. VERIFICACIÓN DE AUTENTICACIÓN
+    if (!user) {
+      alert("⚠️ Debes iniciar sesión para añadir accesorios al carrito.");
+      nav('/auth'); // Redirige al login
+      return;
+    }
 
-    // 2. Si está logueado, procede con la compra
-    addToCart(accessory, 1); 
+    // 2. Si está logueado, procede con la compra
+    addToCart(accessory, 1); 
     alert(`🛒 Accesorio: ${accessory.name} añadido.`);
   };
 
-  // ... Obtener accesorios relacionados y petIndicatorClass (sin cambios)
+  // Lógica de datos secundarios
   const relatedAccessories = plant.accessories
     ? ACCESSORIES.filter(acc => plant.accessories.includes(acc.id))
     : [];
@@ -73,7 +73,7 @@ export default function PlantPage(){
 
 
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-white shadow-xl rounded-xl mt-8">
+    <div className="max-w-6xl mx-auto p-6 bg-white shadow-xl rounded-xl mt-8">
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
@@ -154,15 +154,14 @@ export default function PlantPage(){
                 </button>
             ) : (
                 <button
-                    onClick={handleBuyPlant} // Usa la función modificada
+                    onClick={handleBuyPlant} // Usa la función protegida
                     className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition duration-300 text-xl flex items-center justify-center gap-2"
                 >
                     <HiShoppingCart size={24} /> Añadir ({quantity}) al Carrito
                 </button>
             )}
             
-            {/* ... (Resto del código sin cambios) ... */}
-            <div className="mt-4 text-center">
+            <div className="mt-4 text-center">
                 <button onClick={() => nav('/grid')} className="text-sm text-green-600 hover:underline">
                     Continuar comprando
                 </button>
@@ -173,9 +172,18 @@ export default function PlantPage(){
       {/* Sección 2: Descripción y Cross-Selling */}
       <div className="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Columna 1 y 2: Guía Rápida y Tips */}
         <div className="lg:col-span-2">
-          {/* ... (Contenido sin cambios) ... */}
+            <h3 className="text-3xl font-bold text-green-800 mb-4 border-b pb-2">Guía Rápida de Cuidado</h3>
+            <div className="text-gray-700 space-y-4">
+                <p className="leading-relaxed">{plant.description}</p>
+                
+                <h4 className="font-bold text-xl text-green-700">Tips Esenciales:</h4>
+                <ul className="list-disc list-inside space-y-2 ml-4">
+                    <li>💧 **Riego:** {plant.care.watering}</li>
+                    <li>💡 **Luz:** {plant.care.light}</li>
+                    <li>🌡️ **Temperatura:** {plant.care.temperature}</li>
+                </ul>
+            </div>
         </div>
 
         {/* Columna 3: Cross-Selling (Venta Cruzada) */}
@@ -195,7 +203,7 @@ export default function PlantPage(){
                   <div className="text-xs text-slate-500">{acc.desc}</div>
                 </div>
                 <button
-                  onClick={() => handleBuyAccessory(acc)} // Usa la función modificada
+                  onClick={() => handleBuyAccessory(acc)} // Usa la función protegida
                   disabled={isAccessoryInCart(acc.id)} 
                   className={`ml-3 px-3 py-1 text-xs rounded-full font-bold transition ${
                     isAccessoryInCart(acc.id) 
